@@ -1,1 +1,2754 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Logesh Bills</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --g1: #b8860b;
+  --g2: #daa520;
+  --g3: #f5d060;
+  --g4: #fff8e7;
+  --g5: #3d2a00;
+  --g6: #6b4c00;
+  --gbg: #1a1000;
+  --gbg2: #241700;
+  --gbg3: #2e1e00;
+  --gtext: #fff3cc;
+  --gmuted: #c8a840;
+  --cream: #fffdf5;
+  --border: #c8960a;
+  --text: #1a0e00;
+  --muted: #7a5800;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-y: auto; height: auto; }
+body { font-family: 'Lato', sans-serif; background: linear-gradient(135deg, #1a1000 0%, #2e1e00 50%, #1a1000 100%); color: var(--text); min-height: 100vh; }
+
+/* ===== EDITOR ===== */
+#editor {
+  background: linear-gradient(180deg, #0d0800 0%, var(--gbg2) 100%);
+  color: var(--gtext);
+  padding: 28px 32px;
+  border-bottom: 2px solid var(--g2);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.6);
+}
+#editor h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--g3);
+  margin-bottom: 20px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#editor h2::before, #editor h2::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g2), transparent);
+}
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px 18px;
+}
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-group label {
+  font-size: 0.65rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--gmuted);
+  font-weight: 700;
+}
+.field-group input, .field-group select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,152,10,0.3);
+  border-radius: 4px;
+  color: var(--gtext);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.85rem;
+  padding: 7px 11px;
+  transition: all 0.2s;
+  width: 100%;
+}
+.field-group input:focus, .field-group select:focus {
+  outline: none;
+  border-color: var(--g2);
+  background: rgba(255,220,50,0.07);
+  box-shadow: 0 0 0 2px rgba(218,165,32,0.2);
+}
+.field-group select option { background: #1a1000; color: var(--gtext); }
+/* Gold rate special */
+#gold-rate {
+  background: rgba(218,165,32,0.15) !important;
+  border: 2px solid var(--g2) !important;
+  color: var(--g3) !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  box-shadow: 0 0 12px rgba(218,165,32,0.2) !important;
+}
+
+/* GST Toggle */
+.gst-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(218,165,32,0.08);
+  border: 1px solid rgba(218,165,32,0.3);
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+}
+.gst-toggle-wrap:hover { background: rgba(218,165,32,0.14); }
+.gst-toggle-wrap label { cursor: pointer; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gmuted); font-weight: 700; margin: 0; }
+.toggle-switch {
+  position: relative; width: 40px; height: 22px; flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(218,165,32,0.3);
+  border-radius: 22px;
+  transition: all 0.25s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute;
+  width: 16px; height: 16px;
+  left: 3px; top: 50%; transform: translateY(-50%);
+  background: var(--gmuted);
+  border-radius: 50%; transition: all 0.25s;
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: linear-gradient(135deg, var(--g1), var(--g2));
+  border-color: var(--g2);
+  box-shadow: 0 0 8px rgba(218,165,32,0.4);
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translate(18px, -50%);
+  background: #fff;
+}
+
+/* ===== ITEMS EDITOR ===== */
+#items-editor {
+  background: linear-gradient(180deg, var(--gbg2) 0%, var(--gbg3) 100%);
+  padding: 20px 32px 24px;
+  border-bottom: 2px solid var(--g2);
+}
+.items-editor-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+#items-editor h3 {
+  font-family: 'Playfair Display', serif;
+  color: var(--g3);
+  font-size: 0.95rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.rate-badge {
+  background: linear-gradient(135deg, rgba(218,165,32,0.2), rgba(184,134,11,0.1));
+  border: 1px solid var(--g2);
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 0.78rem;
+  color: var(--g3);
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 0 8px rgba(218,165,32,0.15);
+}
+.items-table-wrap { overflow-x: auto; }
+.items-table-editor { width: 100%; border-collapse: collapse; min-width: 700px; }
+.items-table-editor thead tr {
+  background: linear-gradient(90deg, rgba(218,165,32,0.15), rgba(184,134,11,0.1), rgba(218,165,32,0.15));
+  border-bottom: 1px solid rgba(218,165,32,0.4);
+}
+.items-table-editor th {
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--g2);
+  padding: 8px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+.items-table-editor td { padding: 4px 4px; vertical-align: middle; }
+.items-table-editor tbody tr:nth-child(even) { background: rgba(255,220,50,0.03); }
+.items-table-editor input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,152,10,0.25);
+  border-radius: 3px;
+  color: var(--gtext);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.82rem;
+  padding: 6px 8px;
+  width: 100%;
+  transition: all 0.15s;
+}
+.items-table-editor input:focus {
+  outline: none;
+  border-color: var(--g2);
+  background: rgba(255,220,50,0.07);
+}
+/* Editable amount — slightly distinct */
+.items-table-editor input.amt-input {
+  background: rgba(218,165,32,0.1);
+  border-color: rgba(218,165,32,0.4);
+  color: var(--g3);
+  font-weight: 700;
+  text-align: right;
+}
+.items-table-editor input.amt-input:focus {
+  background: rgba(218,165,32,0.18);
+  border-color: var(--g2);
+}
+/* When manually overridden, show a distinct tint */
+.items-table-editor input.amt-overridden {
+  background: rgba(255,180,0,0.18) !important;
+  border-color: var(--g2) !important;
+  border-style: dashed !important;
+  color: #ffe066 !important;
+}
+.rate-cell {
+  color: rgba(218,165,32,0.65);
+  font-size: 0.78rem;
+  padding: 6px 8px;
+  white-space: nowrap;
+  text-align: center;
+}
+/* Preset items quick-add */
+.preset-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(218,165,32,0.2);
+}
+.preset-bar-label {
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gmuted);
+  font-weight: 700;
+  width: 100%;
+  margin-bottom: 2px;
+}
+.preset-btn {
+  background: rgba(218,165,32,0.08);
+  border: 1px solid rgba(218,165,32,0.3);
+  border-radius: 20px;
+  color: var(--g3);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 5px 14px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.preset-btn:hover {
+  background: rgba(218,165,32,0.2);
+  border-color: var(--g2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(218,165,32,0.2);
+}
+  background: rgba(218,165,32,0.07);
+  border-color: rgba(218,165,32,0.3);
+  color: var(--g3);
+  text-align: right;
+}
+.items-table-editor input.rate-input.rate-custom {
+  background: rgba(218,165,32,0.18) !important;
+  border-color: var(--g2) !important;
+  border-style: dashed !important;
+  color: #ffe066 !important;
+  font-weight: 700;
+}
+/* Add/Subtract toggle */
+.type-toggle { display: flex; border-radius: 4px; overflow: hidden; border: 1px solid rgba(218,165,32,0.3); }
+.type-toggle button {
+  flex: 1; padding: 5px 6px; border: none; cursor: pointer;
+  font-size: 0.85rem; font-weight: 700; line-height: 1;
+  background: rgba(255,255,255,0.05); color: var(--gmuted);
+  transition: all 0.15s;
+}
+.type-toggle button.active-add { background: rgba(50,180,80,0.25); color: #6fea8a; }
+.type-toggle button.active-sub { background: rgba(220,60,60,0.25); color: #ff9090; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--g2), var(--g1), var(--g2));
+  background-size: 200% auto;
+  color: #0d0800;
+  box-shadow: 0 2px 12px rgba(218,165,32,0.4);
+}
+.btn-gold:hover { background-position: right center; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(218,165,32,0.5); }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--g2);
+  color: var(--g2);
+}
+.btn-outline:hover { background: rgba(218,165,32,0.12); }
+.btn-danger {
+  background: rgba(180,40,40,0.2);
+  border: 1px solid rgba(200,80,80,0.35);
+  color: #f88;
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  letter-spacing: 0;
+}
+.btn-danger:hover { background: rgba(180,40,40,0.4); }
+.editor-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; align-items: center; }
+
+/* ===== FLOATING ACTIONS (bottom right) ===== */
+#fab-actions {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+#fab-actions .btn {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  border-radius: 6px;
+  white-space: nowrap;
+  font-size: 0.76rem;
+}
+
+/* ===== BILL PREVIEW ===== */
+#preview-wrap {
+  padding: 32px 24px 100px;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+#bill {
+  background: var(--cream);
+  width: 800px;
+  max-width: 100%;
+  padding: 36px 42px;
+  box-shadow: 0 12px 60px rgba(0,0,0,0.5), inset 0 0 80px rgba(218,165,32,0.03);
+  border: 1.5px solid var(--border);
+  position: relative;
+  border-radius: 2px;
+}
+#bill::before {
+  content: attr(data-watermark);
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-family: 'Playfair Display', serif;
+  font-size: 5rem; font-weight: 700;
+  color: rgba(200,152,10,0.05);
+  white-space: nowrap; pointer-events: none; letter-spacing: 10px;
+}
+/* Decorative corner lines */
+#bill::after {
+  content: '';
+  position: absolute; inset: 8px;
+  border: none;
+  pointer-events: none;
+}
+.bill-header {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 2px solid var(--g1);
+  padding-bottom: 16px; margin-bottom: 12px;
+}
+.bill-logo { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.logo-circle {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--g2), var(--g1));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 700; color: white;
+  border: 3px solid var(--g3);
+  box-shadow: 0 0 16px rgba(218,165,32,0.4);
+  transition: all 0.2s;
+  flex-shrink: 0;
+  text-align: center;
+  line-height: 1.1;
+  padding: 4px;
+  word-break: break-word;
+}
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; color: var(--text);
+  letter-spacing: 4px; text-transform: uppercase;
+  text-align: center;
+  background: linear-gradient(135deg, var(--g1), var(--g2), var(--g1));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+/* ── PDF MODE: clean flat rendering for jsPDF html() ── */
+.pdf-mode, .pdf-mode * {
+  animation: none !important;
+  transition: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+.pdf-mode {
+  width: 794px !important;
+  padding: 22px 32px !important;
+  border: 1.5px solid #c8960a !important;
+  border-radius: 0 !important;
+  background: #fffdf5 !important;
+}
+.pdf-mode .brand-name {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #b8860b !important;
+  background-clip: unset !important;
+  color: #b8860b !important;
+  font-size: 1.3rem !important;
+}
+/* Strip gradient text from any shimmer elements */
+.pdf-mode h2, .pdf-mode h3,
+.pdf-mode .bill-type-tag,
+.pdf-mode .rate-badge {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: inherit !important;
+  background-clip: unset !important;
+}
+.pdf-mode .bill-header {
+  padding-bottom: 10px !important;
+  margin-bottom: 8px !important;
+}
+.pdf-mode .bill-top-meta  { margin-bottom: 6px !important; }
+.pdf-mode .bill-type-tag  { padding: 4px 0 !important; margin-bottom: 8px !important; }
+.pdf-mode .bill-meta      { margin-bottom: 8px !important; gap: 3px 20px !important; font-size: 0.78rem !important; }
+.pdf-mode .bill-table td  { padding: 5px 8px !important; }
+.pdf-mode .bill-table th  { padding: 6px 8px !important; }
+.pdf-mode .bill-footer    { margin-top: 12px !important; padding-top: 10px !important; }
+.pdf-mode .signature-section { margin-top: 18px !important; }
+.pdf-mode .sig-space      { height: 30px !important; }
+.pdf-mode .for-shop-label { font-size: 0.78rem !important; }
+.pdf-mode .bill-address   { margin-top: 12px !important; padding-top: 8px !important; }
+.pdf-mode .bill-ornament  { margin-top: 10px !important; }
+.pdf-mode .logo-circle    { width: 62px !important; height: 62px !important; font-size: 1.4rem !important; }
+.pdf-mode .bis-badge      { background: #b8860b !important; }
+.pdf-mode .bill-table th  { background: #3d2a00 !important; }
+.pdf-mode .grand-total-row td { background: #3d2a00 !important; }
+.pdf-mode #bill::before   { display: none !important; }
+.brand-subtitle {
+  font-size: 0.68rem; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--muted);
+  text-align: center;
+}
+.bis-badge {
+  background: linear-gradient(135deg, var(--g2), var(--g1));
+  color: white; border-radius: 6px; padding: 8px 14px;
+  text-align: center; font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; line-height: 1.7;
+  box-shadow: 0 2px 8px rgba(218,165,32,0.3);
+}
+.bill-top-meta {
+  display: flex; justify-content: space-between;
+  font-size: 0.72rem; margin-bottom: 10px;
+  color: var(--muted); letter-spacing: 1px;
+  text-transform: uppercase; font-weight: 700;
+  padding: 5px 0; border-bottom: 1px dotted rgba(200,152,10,0.3);
+}
+.bill-type-tag {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; font-weight: 700;
+  color: var(--g1);
+  border: 1.5px solid rgba(200,152,10,0.3);
+  padding: 6px 0; margin-bottom: 14px;
+  letter-spacing: 5px; text-transform: uppercase;
+  background: linear-gradient(135deg, rgba(218,165,32,0.05), transparent);
+}
+.bill-meta {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 5px 24px; margin-bottom: 14px; font-size: 0.82rem;
+}
+.meta-row { display: flex; gap: 6px; }
+.meta-label { color: var(--muted); font-weight: 700; min-width: 130px; }
+.meta-value { color: var(--text); }
+.bill-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.bill-table th {
+  background: linear-gradient(135deg, var(--g5), var(--g6));
+  color: var(--g3);
+  padding: 9px 10px; text-align: left;
+  font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 0.7rem;
+}
+.bill-table th:last-child, .bill-table td:last-child { text-align: right; }
+.bill-table th:nth-child(3), .bill-table td:nth-child(3) { text-align: center; }
+.bill-table th:nth-child(5), .bill-table td:nth-child(5),
+.bill-table th:nth-child(6), .bill-table td:nth-child(6) { text-align: center; }
+.bill-table td { padding: 7px 10px; border-bottom: 1px solid #edddb0; color: var(--text); }
+.bill-table tbody tr:nth-child(even) { background: rgba(218,165,32,0.04); }
+.section-header td {
+  background: linear-gradient(90deg, rgba(218,165,32,0.12), rgba(218,165,32,0.06));
+  font-weight: 700; font-size: 0.7rem; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--g1); padding: 5px 10px; border-bottom: none;
+}
+.totals-section { border-top: 2px solid var(--g1); }
+.totals-section td { font-weight: 700; border-bottom: none; }
+.total-row td { background: rgba(218,165,32,0.07); }
+.grand-total-row td {
+  background: linear-gradient(135deg, var(--g5), var(--g6));
+  color: var(--g3);
+  font-family: 'Playfair Display', serif; font-size: 1rem; padding: 11px 10px;
+}
+.gst-row td:first-child { padding-left: 30px; font-size: 0.78rem; color: var(--muted); }
+.bill-footer {
+  margin-top: 20px; border-top: 1px solid rgba(200,152,10,0.3);
+  padding-top: 16px; display: grid; grid-template-columns: 1fr auto;
+  gap: 20px; font-size: 0.8rem;
+}
+.bank-details { color: var(--muted); line-height: 1.8; }
+.bank-details strong { color: var(--text); }
+.signature-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 28px;
+}
+.sig-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160px;
+}
+.sig-block-right {
+  align-items: flex-end;
+}
+.for-shop-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--muted);
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  text-align: right;
+}
+.sig-space {
+  height: 44px;
+  width: 100%;
+}
+.sig-line {
+  border-top: 1px solid rgba(200,152,10,0.4);
+  padding-top: 6px;
+  min-width: 160px;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.bill-address { text-align: center; margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(200,152,10,0.2); font-size: 0.71rem; color: var(--muted); line-height: 1.9; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0; }
+.bill-addr-line { font-family: 'Cormorant Garamond', serif; font-size: 0.78rem; letter-spacing: 0.8px; color: var(--muted); }
+.bill-addr-sep { margin: 0 10px; color: var(--g2); font-size: 0.6rem; }
+
+/* Hallmark rows */
+.hallmark-charge-row td { background: rgba(184,134,11,0.06); border-top: 1px solid rgba(200,152,10,0.2); padding: 6px 10px; }
+.hallmark-gst-row td { background: rgba(184,134,11,0.04); padding: 5px 10px; border-bottom: 1px solid rgba(200,152,10,0.18); }
+.hallmark-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem; font-weight: 600;
+  color: var(--g1); letter-spacing: 0.5px;
+}
+.hallmark-amt-val {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700; font-size: 0.86rem; color: var(--text);
+}
+.hallmark-gst-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.82rem; font-style: italic; color: var(--muted); letter-spacing: 0.3px;
+}
+.hallmark-gst-label em { font-style: italic; font-size: 0.76rem; opacity: 0.8; }
+.hallmark-gst-val {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.82rem; color: var(--muted);
+}
+
+/* Gold ornament footer */
+.bill-ornament {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  opacity: 0.72;
+}
+.bill-ornament-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 14px;
+}
+.orn-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c8960a 30%, #daa520 60%, #c8960a 80%, transparent);
+}
+.orn-line-rev {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c8960a 20%, #daa520 50%, #c8960a 70%, transparent);
+}
+@media print { #editor, #items-editor, #fab-actions { display: none; } }
+
+/* ===================================================
+   ✨ SHINE & SHIMMER EFFECTS
+   =================================================== */
+
+/* --- Keyframes --- */
+@keyframes shimmer-sweep {
+  0%   { background-position: -400% center; }
+  100% { background-position: 400% center; }
+}
+@keyframes shimmer-x {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(300%) skewX(-15deg); }
+}
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(218,165,32,0.2), 0 0 0 1px rgba(218,165,32,0.08); }
+  50%       { box-shadow: 0 0 22px rgba(218,165,32,0.45), 0 0 0 1px rgba(218,165,32,0.2); }
+}
+@keyframes glow-pulse-copper {
+  0%, 100% { box-shadow: 0 0 8px rgba(210,120,30,0.2), 0 0 50px rgba(210,120,30,0.08); }
+  50%       { box-shadow: 0 0 28px rgba(210,120,30,0.55), 0 0 60px rgba(210,120,30,0.18); }
+}
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(218,165,32,0.3); }
+  50%       { border-color: rgba(245,208,96,0.7); }
+}
+@keyframes text-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes float-glow {
+  0%, 100% { transform: translateY(0);    filter: drop-shadow(0 0 4px rgba(218,165,32,0.3)); }
+  50%       { transform: translateY(-3px); filter: drop-shadow(0 0 10px rgba(218,165,32,0.6)); }
+}
+@keyframes spin-slow {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes scan-line {
+  0%   { top: 0%; opacity: 0.7; }
+  90%  { opacity: 0.7; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ── LOGIN PAGE ── */
+
+/* Card glow pulse */
+.login-box {
+  animation: glow-pulse-copper 3s ease-in-out infinite;
+}
+
+/* Shimmer sweep on the top shimmer line (::after) */
+.login-box::after {
+  background: linear-gradient(90deg, transparent 0%, #e8922a 30%, #ffd280 50%, #e8922a 70%, transparent 100%);
+  background-size: 200% auto;
+  animation: shimmer-sweep 3s linear infinite;
+}
+
+/* Logo box — shine sweep overlay */
+.login-logo-box {
+  position: relative;
+  overflow: hidden;
+}
+.login-logo-box::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  animation: shimmer-x 2.8s ease-in-out infinite;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Login title shimmer text */
+.login-title {
+  background: linear-gradient(90deg, #a06010 0%, #f0a830 25%, #ffd060 50%, #f0a830 75%, #a06010 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer 3s linear infinite;
+}
+
+/* Input fields — border glow on focus (enhanced) */
+.login-field input:focus {
+  animation: border-glow 1.5s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(212,130,15,0.22), 0 0 14px rgba(212,130,15,0.18);
+}
+
+/* Sign in button — shimmer sweep */
+.login-btn {
+  position: relative; overflow: hidden;
+}
+.login-btn::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer-x 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── EDITOR PANEL ── */
+
+/* Editor header title */
+#editor h2 {
+  background: linear-gradient(90deg, var(--g1) 0%, var(--g3) 30%, #fff8c0 50%, var(--g3) 70%, var(--g1) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer 4s linear infinite;
+}
+
+/* Section labels — shimmer underline */
+.editor-section-label {
+  position: relative; overflow: hidden;
+}
+.editor-section-label::after {
+  content: '';
+  position: absolute; bottom: 0; left: -100%; width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g3), transparent);
+  animation: shimmer-x 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Gold rate input — glow pulse */
+#gold-rate {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* GST toggle wrap — subtle border glow */
+.gst-toggle-wrap {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* Bill type buttons — active button shimmer */
+#btn-original, #btn-copy, #btn-estimation {
+  position: relative; overflow: hidden;
+}
+#btn-original::after, #btn-copy::after, #btn-estimation::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: shimmer-x 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Gold download button — shimmer */
+.btn-gold {
+  position: relative; overflow: hidden;
+}
+.btn-gold::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 55%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.28), transparent);
+  animation: shimmer-x 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Items editor header */
+#items-editor h3 {
+  background: linear-gradient(90deg, var(--g1) 0%, var(--g3) 40%, #fff8c0 55%, var(--g3) 70%, var(--g1) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer 4s linear infinite;
+}
+
+/* Rate badge — glow */
+.rate-badge {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Preset buttons — shimmer on hover */
+.preset-btn {
+  position: relative; overflow: hidden;
+}
+.preset-btn::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.2), transparent);
+  opacity: 0; transition: opacity 0.2s;
+  pointer-events: none;
+}
+.preset-btn:hover::after {
+  opacity: 1;
+  animation: shimmer-x 0.8s ease-in-out;
+}
+
+/* ── BILL PREVIEW ── */
+
+/* Bill container — soft shimmer border pulse */
+#bill {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+/* Bill header bottom border shimmer */
+.bill-header {
+  position: relative;
+}
+.bill-header::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 5%; right: 5%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--g2) 20%, var(--g3) 50%, var(--g2) 80%, transparent);
+  background-size: 200% auto;
+  animation: shimmer-sweep 3s linear infinite;
+  pointer-events: none;
+}
+
+/* Logo circle — float glow */
+.logo-circle {
+  animation: float-glow 3s ease-in-out infinite;
+}
+
+/* Brand name — shimmer text */
+.brand-name {
+  background: linear-gradient(90deg, var(--g1) 0%, var(--g2) 25%, var(--g3) 50%, var(--g2) 75%, var(--g1) 100%) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  animation: text-shimmer 4s linear infinite;
+}
+/* Keep pdf-mode override intact */
+.pdf-mode .brand-name {
+  animation: none !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #b8860b !important;
+  background-clip: unset !important;
+  color: #b8860b !important;
+}
+
+/* BIS badge — shimmer sweep */
+.bis-badge {
+  position: relative; overflow: hidden;
+}
+.bis-badge::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer-x 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Bill type tag — shimmer text + border glow */
+.bill-type-tag {
+  position: relative; overflow: hidden;
+  animation: border-glow 3s ease-in-out infinite;
+}
+.bill-type-tag::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(218,165,32,0.15), transparent);
+  animation: shimmer-x 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Table header row — shimmer sweep */
+.bill-table th {
+  position: relative; overflow: hidden;
+}
+.bill-table th::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: shimmer-x 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Grand total row — strong shimmer */
+.grand-total-row td {
+  position: relative; overflow: hidden;
+}
+.grand-total-row td::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.18), transparent);
+  animation: shimmer-x 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Bill ornament — glow float */
+.bill-ornament {
+  filter: drop-shadow(0 0 4px rgba(184,134,11,0.35));
+  animation: float-glow 4s ease-in-out infinite;
+}
+
+/* ── FAB BUTTONS ── */
+#fab-actions .btn-gold {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+
+
+/* ===== LOGIN SCREEN ===== */
+#login-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(ellipse at 35% 25%, #1c0e05 0%, #0a0500 45%, #160b02 75%, #0a0500 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Lato', sans-serif;
+}
+#login-overlay.hidden { display: none; }
+.login-box {
+  background: linear-gradient(160deg, #1e0f04 0%, #2a1505 50%, #1e0f04 100%);
+  border: 1.5px solid #c8761a;
+  border-radius: 16px;
+  padding: 44px 44px 38px;
+  width: 100%; max-width: 410px;
+  box-shadow: 0 0 0 1px rgba(210,120,30,0.12), 0 0 50px rgba(210,120,30,0.12), 0 28px 80px rgba(0,0,0,0.9);
+  position: relative;
+  overflow: hidden;
+}
+.login-box::before {
+  content: '';
+  position: absolute; inset: 9px;
+  border: 1px solid rgba(210,120,30,0.1);
+  border-radius: 9px;
+  pointer-events: none;
+}
+.login-box::after {
+  content: '';
+  position: absolute; top: 0; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, transparent, #e8922a, #ffd280, #e8922a, transparent);
+  border-radius: 2px;
+}
+.login-logo-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  margin-bottom: 30px;
+}
+.login-logo-box {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: linear-gradient(135deg, #8a4608 0%, #c8720e 30%, #f0aa38 58%, #c8720e 80%, #8a4608 100%);
+  border: 2px solid #ffd280;
+  border-radius: 10px;
+  padding: 14px 28px;
+  box-shadow: 0 0 0 3px rgba(210,140,30,0.18), 0 0 28px rgba(210,140,30,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+  margin-bottom: 6px;
+}
+.login-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 700; color: #fff8e0;
+  letter-spacing: 7px; text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  line-height: 1;
+}
+.login-logo-icon { color: rgba(255,248,220,0.55); font-size: 0.65rem; }
+.login-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem; font-weight: 700;
+  color: #f0a830;
+  letter-spacing: 4px; text-transform: uppercase; text-align: center;
+  text-shadow: 0 0 20px rgba(240,168,48,0.25);
+  line-height: 1.15;
+}
+.login-title2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem; font-weight: 600;
+  color: #c8861a;
+  letter-spacing: 8px; text-transform: uppercase; text-align: center;
+}
+.login-subtitle {
+  font-size: 0.6rem; letter-spacing: 2.5px; text-transform: uppercase;
+  color: #7a4e14; text-align: center; margin-top: 2px;
+}
+.login-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.login-field label {
+  font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase;
+  color: #c8861a; font-weight: 700;
+}
+.login-field input {
+  background: rgba(255,160,30,0.05);
+  border: 1px solid rgba(200,118,26,0.35);
+  border-radius: 7px; color: #ffe8b0;
+  font-family: 'Lato', sans-serif; font-size: 0.95rem;
+  padding: 11px 14px; transition: all 0.2s; width: 100%;
+}
+.login-field input::placeholder { color: rgba(200,140,50,0.35); }
+.login-field input:focus {
+  outline: none; border-color: #d4820f;
+  background: rgba(212,130,15,0.09);
+  box-shadow: 0 0 0 3px rgba(212,130,15,0.18);
+}
+.login-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #b86a0a 0%, #e89020 40%, #ffc84a 65%, #e89020 85%, #b86a0a 100%);
+  background-size: 200% auto;
+  border: none; border-radius: 8px;
+  color: #1a0800; font-family: 'Lato', sans-serif;
+  font-size: 0.88rem; font-weight: 900;
+  letter-spacing: 4px; text-transform: uppercase;
+  cursor: pointer; margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(200,120,20,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.25s;
+}
+.login-btn:hover {
+  background-position: right center;
+  box-shadow: 0 6px 30px rgba(200,120,20,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+  transform: translateY(-1px);
+}
+.login-btn:active { transform: translateY(0); }
+.login-error {
+  color: #ff9070; font-size: 0.74rem; text-align: center;
+  margin-top: 12px; min-height: 18px; letter-spacing: 0.5px;
+  display: none;
+}
+.login-error.show { display: block; }
+.login-shake { animation: shake 0.4s ease; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-6px)}
+  80%{transform:translateX(6px)}
+}
+
+/* ==============================================
+   📱 MOBILE RESPONSIVE STYLES
+   ============================================== */
+@media (max-width: 768px) {
+
+  /* ── Login ── */
+  .login-box {
+    padding: 32px 22px 28px;
+    margin: 16px;
+    border-radius: 14px;
+  }
+  .login-logo-box { padding: 12px 18px; }
+  .login-logo-text { font-size: 1.6rem; letter-spacing: 4px; }
+  .login-title { font-size: 1.15rem; letter-spacing: 2px; }
+  .login-title2 { font-size: 0.9rem; letter-spacing: 4px; }
+  .login-field input { font-size: 1rem; padding: 13px 14px; }
+  .login-btn { padding: 15px; font-size: 0.9rem; }
+
+  /* ── Editor ── */
+  #editor { padding: 18px 16px; }
+  #editor h2 { font-size: 1rem; letter-spacing: 2px; margin-bottom: 14px; }
+  .editor-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px 12px;
+  }
+  .editor-grid .field-group[style*="grid-column:span 2"],
+  .editor-grid .field-group[style*="grid-column: span 2"] {
+    grid-column: span 2;
+  }
+  .field-group input, .field-group select {
+    font-size: 0.95rem;
+    padding: 9px 11px;
+  }
+  .gst-toggle-wrap { padding: 7px 10px; }
+  .editor-section-label { font-size: 0.62rem; }
+  #gold-rate { font-size: 0.95rem !important; }
+
+  /* Bill type toggle buttons */
+  #btn-original, #btn-copy, #btn-estimation {
+    font-size: 0.7rem;
+    padding: 8px 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Items Editor ── */
+  #items-editor { padding: 14px 14px 18px; }
+  .items-editor-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .rate-badge { font-size: 0.72rem; padding: 4px 12px; align-self: flex-start; }
+  .preset-bar { gap: 5px; }
+  .preset-btn { font-size: 0.7rem; padding: 5px 10px; }
+  .items-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .items-table-editor { min-width: 580px; }
+  .editor-actions { gap: 8px; }
+  .editor-actions .btn { padding: 9px 14px; font-size: 0.72rem; letter-spacing: 1px; }
+
+  /* ── Bill Preview ── */
+  #preview-wrap { padding: 16px 8px 100px; }
+  #bill {
+    padding: 20px 16px;
+    width: 100%;
+    font-size: 0.75rem;
+  }
+  .bill-header { flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .bill-header > div:first-child { order: 3; width: 100%; text-align: center; }
+  .bill-header > div:last-child { order: 2; }
+  .logo-circle { width: 60px; height: 60px; font-size: 1.3rem; }
+  .brand-name { font-size: 1.2rem; letter-spacing: 2px; }
+  .brand-subtitle { font-size: 0.58rem; letter-spacing: 2px; }
+  .bis-badge { font-size: 0.58rem; padding: 6px 10px; }
+  .bill-top-meta { font-size: 0.62rem; flex-wrap: wrap; gap: 4px 10px; }
+  .bill-type-tag { font-size: 1rem; letter-spacing: 3px; }
+  .bill-meta { grid-template-columns: 1fr; gap: 4px 0; font-size: 0.75rem; }
+  .meta-label { min-width: 100px; font-size: 0.72rem; }
+  .bill-table { font-size: 0.72rem; }
+  .bill-table th { padding: 7px 6px; font-size: 0.6rem; }
+  .bill-table td { padding: 5px 6px; }
+  .grand-total-row td { font-size: 0.88rem; padding: 9px 6px; }
+  .bill-footer { grid-template-columns: 1fr; gap: 10px; font-size: 0.72rem; }
+  .signature-row { margin-top: 30px; }
+  .sig-line { min-width: 100px; font-size: 0.65rem; }
+  .bill-address { font-size: 0.65rem; }
+
+  /* ── Floating buttons ── */
+  #fab-actions {
+    bottom: 12px;
+    right: 12px;
+    gap: 7px;
+  }
+  #fab-actions .btn {
+    font-size: 0.68rem;
+    padding: 9px 14px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Send Modal ── */
+  #send-modal {
+    margin: 20px auto;
+    padding: 22px 16px;
+  }
+  #send-modal > div:first-child h3 { font-size: 0.88rem; }
+  #send-modal [style*="grid-template-columns: 1fr 1fr"],
+  #send-modal [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  #send-modal button[onclick*="sendWhatsApp"],
+  #send-modal button[onclick*="sendEmail"] {
+    min-width: unset;
+    font-size: 0.7rem;
+    padding: 10px 10px;
+  }
+
+  /* ── Customer / Shop Modals ── */
+  #cust-modal, #cust-modal ~ div {
+    padding: 20px 14px;
+    margin: 16px auto;
+  }
+  .cust-card { flex-direction: column; gap: 10px; }
+  .cust-card-actions { flex-direction: row; }
+}
+
+@media (max-width: 420px) {
+  .editor-grid { grid-template-columns: 1fr !important; }
+  .editor-grid .field-group[style*="grid-column:span 2"],
+  .editor-grid .field-group[style*="grid-column: span 2"] {
+    grid-column: span 1 !important;
+  }
+  .login-box { padding: 26px 16px 24px; }
+  .login-logo-text { font-size: 1.4rem; }
+  .bill-table { font-size: 0.66rem; }
+  .bill-table th, .bill-table td { padding: 4px 4px; }
+  #bill { padding: 14px 10px; }
+  #fab-actions .btn { font-size: 0.63rem; padding: 8px 10px; }
+}
+
+
+.editor-section-label {
+  font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--g2); font-weight: 700;
+  border-bottom: 1px solid rgba(218,165,32,0.2);
+  padding-bottom: 8px; margin-bottom: 14px; margin-top: 4px;
+  display: flex; align-items: center; gap: 10px;
+}
+.btn-manage-cust {
+  margin-left: auto;
+  background: rgba(218,165,32,0.12);
+  border: 1px solid rgba(218,165,32,0.4);
+  color: var(--g3); border-radius: 20px;
+  padding: 4px 14px; font-size: 0.68rem;
+  letter-spacing: 1px; cursor: pointer;
+  font-family: 'Lato', sans-serif; font-weight: 700;
+  transition: all 0.15s;
+}
+.btn-manage-cust:hover { background: rgba(218,165,32,0.25); }
+
+/* Customer card in modal */
+.cust-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(218,165,32,0.2);
+  border-radius: 6px; padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.cust-card:hover { background: rgba(218,165,32,0.06); border-color: rgba(218,165,32,0.4); }
+.cust-card-info { flex: 1; }
+.cust-card-name { font-weight: 700; color: var(--g3); font-size: 0.92rem; margin-bottom: 4px; }
+.cust-card-detail { font-size: 0.75rem; color: var(--gmuted); line-height: 1.7; }
+.cust-card-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.btn-use-cust {
+  background: linear-gradient(135deg, var(--g2), var(--g1));
+  border: none; color: #0d0800; border-radius: 4px;
+  padding: 6px 14px; font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap; font-family: 'Lato', sans-serif;
+  letter-spacing: 1px;
+}
+.btn-del-cust {
+  background: rgba(180,40,40,0.2); border: 1px solid rgba(200,80,80,0.3);
+  color: #f88; border-radius: 4px;
+  padding: 5px 14px; font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; font-family: 'Lato', sans-serif; letter-spacing: 1px;
+}
+.btn-del-cust:hover { background: rgba(180,40,40,0.4); }
+.no-customers {
+  text-align: center; padding: 32px; color: var(--gmuted);
+  font-size: 0.82rem; letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN OVERLAY ===== -->
+<div id="login-overlay">
+  <div class="login-box" id="login-box">
+    <div class="login-logo-wrap">
+      <div class="login-logo-box">
+        <span class="login-logo-icon">&#9670;</span>
+        <span class="login-logo-text">LB</span>
+        <span class="login-logo-icon">&#9670;</span>
+      </div>
+      <div class="login-title">Logesh Billing</div>
+      <div class="login-title2">Software</div>
+      <div class="login-subtitle">Jewellery Bill Generator &bull; Secure Access</div>
+    </div>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="login-user" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <div style="position:relative">
+        <input type="password" id="login-pwd" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:42px">
+        <button onclick="togglePwd()" id="pwd-eye" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gmuted);font-size:1rem;padding:0;line-height:1" title="Show/Hide password">&#128065;</button>
+      </div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-error">&#10060; Invalid username or password. Please try again.</div>
+  </div>
+</div>
+
+<!-- ===== EDITOR ===== -->
+<div id="editor">
+  <h2>Bill Details</h2>
+
+  <!-- SECTION 1: Bill Info -->
+  <div class="editor-section-label">📋 Bill Info</div>
+  <div class="editor-grid" style="margin-bottom:18px">
+    <div class="field-group">
+      <label>Invoice No</label>
+      <input id="inv-no" value="625" oninput="render()">
+    </div>
+    <div class="field-group">
+      <label>Date</label>
+      <input id="inv-date" type="date" value="2026-03-07" oninput="render()">
+    </div>
+    <div class="field-group">
+      <label>&#9733; Gold Rate (Rs/gram)</label>
+      <input id="gold-rate" type="number" value="16000.00" step="0.01" oninput="onGoldRateChange()">
+    </div>
+    <div class="field-group">
+      <label>Purity</label>
+      <input id="carat" value="100% Pure Gold" oninput="render()">
+    </div>
+    <div class="field-group">
+      <label>CGST %</label>
+      <input id="cgst" type="number" value="1.5" step="0.01" oninput="render()">
+    </div>
+    <div class="field-group">
+      <label>SGST %</label>
+      <input id="sgst" type="number" value="1.5" step="0.01" oninput="render()">
+    </div>
+    <div class="field-group">
+      <label>HSN Code</label>
+      <input id="hsn" value="7113" oninput="render()">
+    </div>
+    <div class="field-group" style="grid-column:span 2">
+      <label>Bill Type</label>
+      <div style="display:flex;gap:8px;margin-top:2px;flex-wrap:wrap">
+        <button id="btn-original" onclick="setBillType('original')" style="flex:1;min-width:80px;padding:8px 10px;border-radius:4px;font-family:'Lato',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:1px;cursor:pointer;border:2px solid var(--g2);background:linear-gradient(135deg,var(--g2),var(--g1));color:#0d0800;transition:all 0.2s">ORIGINAL</button>
+        <button id="btn-copy" onclick="setBillType('copy')" style="flex:1;min-width:80px;padding:8px 10px;border-radius:4px;font-family:'Lato',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:1px;cursor:pointer;border:2px solid rgba(218,165,32,0.35);background:transparent;color:var(--g2);transition:all 0.2s">BILL COPY</button>
+        <button id="btn-estimation" onclick="setBillType('estimation')" style="flex:1;min-width:80px;padding:8px 10px;border-radius:4px;font-family:'Lato',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:1px;cursor:pointer;border:2px solid rgba(218,165,32,0.35);background:transparent;color:var(--g2);transition:all 0.2s">ESTIMATION</button>
+      </div>
+    </div>
+    <div class="field-group" style="justify-content:flex-end">
+      <label>GST Applicable</label>
+      <div class="gst-toggle-wrap" onclick="document.getElementById('gst-toggle').click()">
+        <label for="gst-toggle">GST On / Off</label>
+        <div class="toggle-switch">
+          <input type="checkbox" id="gst-toggle" checked onchange="render()">
+          <span class="toggle-slider"></span>
+        </div>
+      </div>
+    </div>
+    <div class="field-group" style="justify-content:flex-end">
+      <label>Hallmark Charge</label>
+      <div class="gst-toggle-wrap" onclick="document.getElementById('hallmark-toggle').click()">
+        <label for="hallmark-toggle">Hallmark On / Off</label>
+        <div class="toggle-switch">
+          <input type="checkbox" id="hallmark-toggle" onchange="toggleHallmarkField();render()">
+          <span class="toggle-slider"></span>
+        </div>
+      </div>
+    </div>
+    <div class="field-group" id="hallmark-amt-field" style="display:none">
+      <label>Hallmark Amount (Rs.)</label>
+      <input id="hallmark-amt" type="number" value="100" step="1" min="0" oninput="render()" placeholder="e.g. 100">
+    </div>
+  </div>
+
+  <!-- SECTION 2: Customer -->
+  <div class="editor-section-label">👤 Customer
+    <button class="btn-manage-cust" onclick="openCustomerManager()">⚙ Manage Customers</button>
+  </div>
+  <div class="editor-grid" style="margin-bottom:18px">
+    <div class="field-group" style="grid-column:span 2;position:relative">
+      <label>Customer Name</label>
+      <div style="display:flex;gap:8px">
+        <select id="cust-select" onchange="selectCustomer(this.value)" style="flex:1">
+          <option value="">— Select saved customer —</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group" style="grid-column:span 2">
+      <label>Name (on bill)</label>
+      <input id="cust-name" value="" oninput="render()" placeholder="Customer name">
+    </div>
+    <div class="field-group" style="grid-column:span 2">
+      <label>Address</label>
+      <input id="cust-addr" value="" oninput="render()" placeholder="Customer address">
+    </div>
+    <div class="field-group">
+      <label>PAN Card</label>
+      <input id="cust-pan" value="" oninput="render()" placeholder="AAABB1234C">
+    </div>
+    <div class="field-group">
+      <label>Customer GSTIN</label>
+      <input id="cust-gstin" value="" oninput="render()" placeholder="33XXXXX...">
+    </div>
+    <div class="field-group">
+      <label>Phone</label>
+      <input id="cust-phone" value="" oninput="render()" placeholder="9XXXXXXXXX">
+    </div>
+  </div>
+
+  <!-- SECTION 3: Shop & Bank -->
+  <div class="editor-section-label" style="cursor:pointer" onclick="toggleShopSection()">
+    🏪 Shop &amp; Bank Details
+    <button class="btn-manage-cust" onclick="event.stopPropagation();openShopManager()" style="margin-left:10px">⚙ Manage Shops</button>
+    <span id="shop-toggle-icon" style="margin-left:auto;font-size:0.8rem">▼</span>
+    <span style="font-size:0.6rem;opacity:0.6;margin-left:8px;font-weight:400">click to expand/collapse</span>
+  </div>
+  <div id="shop-section" class="editor-grid" style="margin-bottom:18px;display:none">
+    <div class="field-group" style="grid-column:span 2">
+      <label>Select Saved Shop</label>
+      <select id="shop-select" onchange="selectShop(this.value)">
+        <option value="">— Select saved shop —</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Shop Name</label>
+      <input id="shop-name" value="Rishvik Jewellery" oninput="render()">
+    </div>
+    <div class="field-group">
+      <label>Logo Text (auto-sizes)</label>
+      <input id="shop-logo" value="R*L" oninput="render()" placeholder="e.g. SG or full name">
+    </div>
+    <div class="field-group">
+      <label>Brand Tagline</label>
+      <input id="shop-tagline" value="Jewellery Manufacturers" oninput="render()" placeholder="e.g. Jewellery Manufacturers">
+    </div>
+    <div class="field-group">
+      <label>Shop Phone</label>
+      <input id="shop-phone" value="9894058144" oninput="render()" placeholder="Phone number">
+    </div>
+    <div class="field-group" style="grid-column:span 2">
+      <label>Shop Address</label>
+      <input id="shop-addr" value="Selvapuram" oninput="render()" placeholder="Shop address">
+    </div>
+    <div class="field-group">
+      <label>GSTIN (Seller)</label>
+      <input id="gstin" value="" oninput="render()" placeholder="33XXXXX...">
+    </div>
+    <div class="field-group">
+      <label>Email</label>
+      <input id="shop-email" value="logesh.appusamy@gmail.com" oninput="render()" placeholder="shop@email.com">
+    </div>
+    <div class="field-group" style="grid-column:span 2;margin-top:6px">
+      <label>Bank Details on Bill</label>
+      <div class="gst-toggle-wrap" onclick="document.getElementById('bank-toggle').click()" style="margin-top:4px">
+        <label for="bank-toggle">Show / Hide Bank Details</label>
+        <div class="toggle-switch">
+          <input type="checkbox" id="bank-toggle" checked onchange="render()">
+          <span class="toggle-slider"></span>
+        </div>
+      </div>
+    </div>
+    <div class="field-group" style="grid-column:span 2">
+      <label>Bank Name and Branch</label>
+      <input id="bank-name" value="" oninput="render()" placeholder="Bank name &amp; branch">
+    </div>
+    <div class="field-group">
+      <label>Account Number</label>
+      <input id="bank-acc" value="" oninput="render()" placeholder="Account number">
+    </div>
+    <div class="field-group">
+      <label>IFSC Code</label>
+      <input id="bank-ifsc" value="" oninput="render()" placeholder="IFSC code">
+    </div>
+  </div>
+
+  <div class="editor-actions">
+    <button class="btn btn-gold" onclick="downloadPDF()">&#8659; Download PDF</button>
+    <button class="btn btn-outline" onclick="window.print()">&#128438; Print</button>
+  </div>
+</div>
+
+<!-- ===== CUSTOMER MANAGER MODAL ===== -->
+<div id="cust-modal-overlay" onclick="closeCustModal(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;backdrop-filter:blur(4px);overflow-y:auto">
+  <div id="cust-modal" style="background:linear-gradient(160deg,#1a1000,#2e1e00);border:2px solid var(--g2);border-radius:10px;max-width:720px;width:94%;margin:40px auto;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.8)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h3 style="font-family:'Playfair Display',serif;color:var(--g3);font-size:1.1rem;letter-spacing:3px;text-transform:uppercase">👤 Customer Directory</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="exportCustomers()" style="background:rgba(218,165,32,0.12);border:1px solid rgba(218,165,32,0.35);color:var(--g3);border-radius:4px;padding:6px 12px;cursor:pointer;font-size:0.72rem;font-weight:700;letter-spacing:1px">⬇ Export</button>
+        <label style="background:rgba(218,165,32,0.12);border:1px solid rgba(218,165,32,0.35);color:var(--g3);border-radius:4px;padding:6px 12px;cursor:pointer;font-size:0.72rem;font-weight:700;letter-spacing:1px">⬆ Import<input type="file" accept=".json" onchange="importCustomers(event)" style="display:none"></label>
+        <button onclick="closeCustomerManager()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(218,165,32,0.3);color:var(--g3);border-radius:4px;padding:6px 14px;cursor:pointer;font-size:0.85rem">✕ Close</button>
+      </div>
+    </div>
+
+    <!-- Add new customer form -->
+    <div style="background:rgba(218,165,32,0.06);border:1px solid rgba(218,165,32,0.2);border-radius:8px;padding:20px;margin-bottom:24px">
+      <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gmuted);font-weight:700;margin-bottom:14px">➕ Add New Customer</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px">
+        <div class="field-group" style="grid-column:span 2">
+          <label>Customer Name *</label>
+          <input id="nc-name" placeholder="Full name or business name">
+        </div>
+        <div class="field-group" style="grid-column:span 2">
+          <label>Address</label>
+          <input id="nc-addr" placeholder="Street, City, Pincode">
+        </div>
+        <div class="field-group">
+          <label>PAN Card</label>
+          <input id="nc-pan" placeholder="AAABB1234C">
+        </div>
+        <div class="field-group">
+          <label>GSTIN</label>
+          <input id="nc-gstin" placeholder="33XXXXX...">
+        </div>
+        <div class="field-group">
+          <label>Phone</label>
+          <input id="nc-phone" placeholder="9XXXXXXXXX">
+        </div>
+        <div class="field-group" style="justify-content:flex-end;padding-top:18px">
+          <button class="btn btn-gold" onclick="saveNewCustomer()" style="width:100%">💾 Save Customer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Existing customers list -->
+    <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gmuted);font-weight:700;margin-bottom:12px">📋 Saved Customers (<span id="cust-count">0</span>)</div>
+    <div id="gh-status-bar" style="background:rgba(218,165,32,0.06);border:1px solid rgba(218,165,32,0.15);border-radius:5px;padding:9px 14px;margin-bottom:14px;font-size:0.72rem;color:var(--gmuted);line-height:1.6">
+      🔄 Connecting to GitHub...
+    </div>
+    <div id="cust-list"></div>
+  </div>
+</div>
+
+<!-- ===== SHOP MANAGER MODAL ===== -->
+<div id="shop-modal-overlay" onclick="closeShopModal(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;backdrop-filter:blur(4px);overflow-y:auto">
+  <div style="background:linear-gradient(160deg,#1a1000,#2e1e00);border:2px solid var(--g2);border-radius:10px;max-width:720px;width:94%;margin:40px auto;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.8)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h3 style="font-family:'Playfair Display',serif;color:var(--g3);font-size:1.1rem;letter-spacing:3px;text-transform:uppercase">🏪 Shop Directory</h3>
+      <button onclick="closeShopManager()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(218,165,32,0.3);color:var(--g3);border-radius:4px;padding:6px 14px;cursor:pointer;font-size:0.85rem">✕ Close</button>
+    </div>
+    <!-- Add new shop form -->
+    <div style="background:rgba(218,165,32,0.06);border:1px solid rgba(218,165,32,0.2);border-radius:8px;padding:20px;margin-bottom:24px">
+      <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gmuted);font-weight:700;margin-bottom:14px">➕ Add New Shop</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px">
+        <div class="field-group" style="grid-column:span 2">
+          <label>Shop Name *</label>
+          <input id="ns-name" placeholder="e.g. SG Antiques Jewellery">
+        </div>
+        <div class="field-group">
+          <label>Logo Initials</label>
+          <input id="ns-logo" placeholder="e.g. SG" maxlength="3">
+        </div>
+        <div class="field-group">
+          <label>Brand Tagline</label>
+          <input id="ns-tagline" placeholder="e.g. Jewellery Manufacturers">
+        </div>
+        <div class="field-group">
+          <label>Phone</label>
+          <input id="ns-phone" placeholder="9XXXXXXXXX">
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input id="ns-email" placeholder="shop@email.com">
+        </div>
+        <div class="field-group" style="grid-column:span 2">
+          <label>Address</label>
+          <input id="ns-addr" placeholder="Street, City, Pincode">
+        </div>
+        <div class="field-group">
+          <label>GSTIN</label>
+          <input id="ns-gstin" placeholder="33XXXXX...">
+        </div>
+        <div class="field-group">
+          <label>Bank &amp; Branch</label>
+          <input id="ns-bank" placeholder="Axis Bank, Town Hall">
+        </div>
+        <div class="field-group">
+          <label>Account Number</label>
+          <input id="ns-acc" placeholder="9180XXXXXXXX">
+        </div>
+        <div class="field-group">
+          <label>IFSC Code</label>
+          <input id="ns-ifsc" placeholder="UTIB0001919">
+        </div>
+        <div class="field-group" style="grid-column:span 2">
+          <button class="btn btn-gold" onclick="saveNewShop()" style="width:100%">💾 Save Shop</button>
+        </div>
+      </div>
+    </div>
+    <!-- Saved shops list -->
+    <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gmuted);font-weight:700;margin-bottom:12px">📋 Saved Shops (<span id="shop-count">0</span>)</div>
+    <div id="shop-list"></div>
+  </div>
+</div>
+
+<!-- ===== ITEMS EDITOR ===== -->
+<div id="items-editor">
+  <div class="items-editor-top">
+    <h3>Line Items</h3>
+    <span class="rate-badge" id="rate-badge">Gold Rate: Rs.16,000.00 / gram</span>
+  </div>
+  <div class="preset-bar">
+    <span class="preset-bar-label">⚡ Quick Add</span>
+    <button class="preset-btn" onclick="addPreset('Gold Coin')">🪙 Gold Coin</button>
+    <button class="preset-btn" onclick="addPreset('Silver Coin')">🪙 Silver Coin</button>
+    <button class="preset-btn" onclick="addPreset('Gold Jewels')">✨ Gold Jewels</button>
+    <button class="preset-btn" onclick="addPreset('Silver Jewels')">✨ Silver Jewels</button>
+    <button class="preset-btn" onclick="addPreset('Necklace')">📿 Necklace</button>
+    <button class="preset-btn" onclick="addPreset('Jimikki')">💎 Jimikki</button>
+    <button class="preset-btn" onclick="addPreset('Old Jewels')">♻️ Old Jewels</button>
+    <button class="preset-btn" onclick="addPreset('Stone Weight')">🪨 Stone Weight</button>
+  </div>
+  <div class="items-table-wrap">
+    <table class="items-table-editor">
+      <thead>
+        <tr>
+          <th style="width:36px">#</th>
+          <th style="width:50px;text-align:center">+/−</th>
+          <th style="width:175px">Description</th>
+          <th style="width:110px">Weight (g)</th>
+          <th style="width:140px">Rate (Rs/g)<br><span style="font-size:0.55rem;opacity:0.7;font-weight:400">editable per item</span></th>
+          <th style="width:150px">Amount (Rs.)<br><span style="font-size:0.55rem;opacity:0.7;font-weight:400">auto / overridable</span></th>
+          <th style="width:44px"></th>
+        </tr>
+      </thead>
+      <tbody id="items-tbody"></tbody>
+    </table>
+  </div>
+  <div class="editor-actions" style="margin-top:12px">
+    <button class="btn btn-outline" onclick="addItem()">+ Add Row</button>
+  </div>
+</div>
+
+<!-- ===== BILL PREVIEW ===== -->
+<div id="preview-wrap">
+  <div id="bill"></div>
+</div>
+
+<!-- ===== FLOATING ACTION BUTTONS ===== -->
+<div id="fab-actions">
+  <button class="btn btn-gold" onclick="downloadPDF()">&#8659; Download PDF</button>
+  <button class="btn btn-outline" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(8px)" onclick="window.print()">&#128438; Print</button>
+</div>
+
+<script>
+/*
+  Each item:
+    desc        - description
+    gross       - weight in grams
+    type        - 'add' (default) | 'sub' (subtract from total)
+    rateOverride - null = use global gold rate | number = per-item rate (e.g. stone price)
+    amtOverride  - null = auto-calc (gross × rate) | number = manual amount
+*/
+var items = [{ desc: 'COIN', gross: '500.000', type: 'add', rateOverride: null, amtOverride: null }];
+
+function getGoldRate() { return parseFloat(document.getElementById('gold-rate').value) || 0; }
+
+function effectiveRate(item) {
+  return (item.rateOverride !== null && item.rateOverride !== '') ? parseFloat(item.rateOverride) : getGoldRate();
+}
+
+function autoAmt(item) {
+  return (parseFloat(item.gross) || 0) * effectiveRate(item);
+}
+
+function calcAmt(item) {
+  if (item.amtOverride !== null && item.amtOverride !== '') return parseFloat(item.amtOverride) || 0;
+  return autoAmt(item);
+}
+
+// Signed amount: positive for 'add', negative for 'sub'
+function signedAmt(item) {
+  var a = calcAmt(item);
+  return item.type === 'sub' ? -a : a;
+}
+
+function fmtMoney(n) {
+  return (parseFloat(n)||0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtINR(n) {
+  return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function esc(s) { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// Called when global gold rate changes — refresh all rows that use auto rate
+function onGoldRateChange() {
+  var rate = getGoldRate();
+  document.getElementById('rate-badge').textContent = 'Gold Rate: Rs.' + fmtMoney(rate) + ' / gram';
+  var rows = document.querySelectorAll('#items-tbody tr');
+  rows.forEach(function(row, i) {
+    if (!items[i]) return;
+    // Update rate input placeholder/display if not overridden
+    var ri = row.querySelector('.rate-input');
+    if (ri && items[i].rateOverride === null) ri.placeholder = fmtMoney(rate);
+    // Update amount if neither rate nor amount is overridden
+    var ai = row.querySelector('.amt-input');
+    if (ai && items[i].amtOverride === null && document.activeElement !== ai) {
+      var computed = autoAmt(items[i]);
+      ai.value = computed > 0 ? fmtMoney(computed) : '';
+    }
+  });
+  render();
+}
+
+function setType(i, type) {
+  items[i].type = type;
+  // Re-render just this row's toggle buttons without full table re-render
+  var rows = document.querySelectorAll('#items-tbody tr');
+  if (rows[i]) {
+    var btns = rows[i].querySelectorAll('.type-toggle button');
+    if (btns[0]) { btns[0].className = type === 'add' ? 'active-add' : ''; }
+    if (btns[1]) { btns[1].className = type === 'sub' ? 'active-sub' : ''; }
+  }
+  render();
+}
+
+function updateItem(i, field, val) {
+  items[i][field] = val;
+  if ((field === 'gross') && items[i].amtOverride === null) {
+    var rows = document.querySelectorAll('#items-tbody tr');
+    if (rows[i]) {
+      var ai = rows[i].querySelector('.amt-input');
+      if (ai && document.activeElement !== ai) {
+        var computed = autoAmt(items[i]);
+        ai.value = computed > 0 ? fmtMoney(computed) : '';
+      }
+    }
+  }
+  render();
+}
+
+// Per-row rate field
+function rateFocus(i) {
+  var rows = document.querySelectorAll('#items-tbody tr');
+  if (!rows[i]) return;
+  var ri = rows[i].querySelector('.rate-input');
+  if (!ri) return;
+  var raw = items[i].rateOverride !== null ? items[i].rateOverride : getGoldRate();
+  ri.value = parseFloat(raw).toFixed(2);
+  ri.select();
+}
+
+function rateInput(i, val) {
+  if (val === '' || val === null) {
+    items[i].rateOverride = null;
+  } else {
+    items[i].rateOverride = val;
+  }
+  // Live-update amount if not manually overridden
+  if (items[i].amtOverride === null) {
+    var rows = document.querySelectorAll('#items-tbody tr');
+    if (rows[i]) {
+      var ai = rows[i].querySelector('.amt-input');
+      if (ai && document.activeElement !== ai) {
+        var computed = autoAmt(items[i]);
+        ai.value = computed > 0 ? fmtMoney(computed) : '';
+      }
+    }
+  }
+  render();
+}
+
+function rateBlur(i, val) {
+  var rows = document.querySelectorAll('#items-tbody tr');
+  if (!rows[i]) return;
+  var ri = rows[i].querySelector('.rate-input');
+  if (val === '' || val === null || isNaN(parseFloat(val))) {
+    items[i].rateOverride = null;
+    if (ri) { ri.value = ''; ri.placeholder = fmtMoney(getGoldRate()); ri.className = 'rate-input'; }
+  } else {
+    items[i].rateOverride = parseFloat(val);
+    if (ri) { ri.value = fmtMoney(parseFloat(val)); ri.className = 'rate-input rate-custom'; }
+  }
+  // Recalc amount display
+  if (items[i].amtOverride === null) {
+    var ai = rows[i].querySelector('.amt-input');
+    if (ai) { var c = autoAmt(items[i]); ai.value = c > 0 ? fmtMoney(c) : ''; }
+  }
+  render();
+}
+
+// Amount field handlers
+function amtFocus(i) {
+  var rows = document.querySelectorAll('#items-tbody tr');
+  if (!rows[i]) return;
+  var ai = rows[i].querySelector('.amt-input');
+  if (!ai) return;
+  var raw = items[i].amtOverride !== null ? items[i].amtOverride : autoAmt(items[i]);
+  ai.value = raw > 0 ? parseFloat(raw).toFixed(2) : '';
+  ai.select();
+}
+
+function amtInput(i, val) {
+  items[i].amtOverride = (val === '' || val === null) ? null : val;
+  render();
+}
+
+function amtBlur(i, val) {
+  var rows = document.querySelectorAll('#items-tbody tr');
+  if (!rows[i]) return;
+  var ai = rows[i].querySelector('.amt-input');
+  if (val === '' || val === null || isNaN(parseFloat(val))) {
+    items[i].amtOverride = null;
+    var computed = autoAmt(items[i]);
+    if (ai) ai.value = computed > 0 ? fmtMoney(computed) : '';
+  } else {
+    items[i].amtOverride = parseFloat(val);
+    if (ai) ai.value = fmtMoney(parseFloat(val));
+  }
+  render();
+}
+
+// ===== CUSTOMER DIRECTORY — GitHub Storage =====
+var GH = {
+  token: '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',
+  repo:  'LogeshApps/Billing',
+  file:  'customers.json',
+  sha:   null,
+  shopSha: null
+};
+
+// In-memory customer list (synced from GitHub)
+var customersList = [];
+var ghSyncing = false;
+
+function ghSetStatus(msg, color) {
+  var el = document.getElementById('gh-status-bar');
+  if (el) el.innerHTML = msg;
+}
+
+async function ghFetchCustomers() {
+  ghSetStatus('🔄 Syncing from GitHub...', '#c8a840');
+  try {
+    var resp = await fetch('https://api.github.com/repos/' + GH.repo + '/contents/' + GH.file, {
+      headers: {
+        'Authorization': 'token ' + GH.token,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (resp.status === 404) {
+      // File doesn't exist yet — start fresh
+      customersList = [];
+      GH.sha = null;
+      ghSetStatus('✅ <strong style="color:var(--g3)">GitHub connected.</strong> No customers yet — add your first one above.', '');
+      return;
+    }
+    if (!resp.ok) throw new Error('GitHub error: ' + resp.status);
+    var data = await resp.json();
+    GH.sha = data.sha;
+    var decoded = atob(data.content.replace(/\n/g, ''));
+    customersList = JSON.parse(decoded) || [];
+    ghSetStatus('✅ <strong style="color:var(--g3)">GitHub synced.</strong> ' + customersList.length + ' customer(s) loaded from <code style="color:var(--g3)">LogeshApps/Billing/customers.json</code>', '');
+  } catch(e) {
+    ghSetStatus('❌ <strong style="color:#f88">GitHub sync failed:</strong> ' + e.message + '. Check token/repo.', '');
+    // Fall back to localStorage
+    try { customersList = JSON.parse(localStorage.getItem('sg_customers') || '[]'); } catch(ex) { customersList = []; }
+  }
+}
+
+async function ghSaveCustomers() {
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify(customersList, null, 2))));
+  var body = {
+    message: 'Update customers.json — ' + new Date().toLocaleString('en-IN'),
+    content: content
+  };
+  if (GH.sha) body.sha = GH.sha;
+  ghSetStatus('🔄 Saving to GitHub...', '');
+  try {
+    var resp = await fetch('https://api.github.com/repos/' + GH.repo + '/contents/' + GH.file, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + GH.token,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) throw new Error('GitHub save error: ' + resp.status);
+    var result = await resp.json();
+    GH.sha = result.content.sha;
+    // Also cache locally as backup
+    localStorage.setItem('sg_customers', JSON.stringify(customersList));
+    ghSetStatus('✅ <strong style="color:var(--g3)">Saved to GitHub</strong> — ' + customersList.length + ' customer(s) in <code style="color:var(--g3)">LogeshApps/Billing/customers.json</code>', '');
+  } catch(e) {
+    ghSetStatus('❌ <strong style="color:#f88">Save failed:</strong> ' + e.message, '');
+  }
+}
+
+// Legacy wrappers (sync, for non-async callers)
+function loadCustomers() { return customersList; }
+function saveCustomers(list) {
+  customersList = list;
+  ghSaveCustomers();  // async fire-and-forget
+}
+
+function exportCustomers() {
+  var blob = new Blob([JSON.stringify(customersList, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'SG_Customers_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importCustomers(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      var names = customersList.map(function(c){ return c.name.toLowerCase(); });
+      var added = 0;
+      data.forEach(function(c) {
+        if (c.name && names.indexOf(c.name.toLowerCase()) === -1) {
+          customersList.push(c); names.push(c.name.toLowerCase()); added++;
+        }
+      });
+      ghSaveCustomers();
+      renderCustomerList();
+      refreshCustomerDropdown();
+      alert('✔ Imported ' + added + ' customer(s). ' + (data.length - added) + ' duplicate(s) skipped.');
+    } catch(err) { alert('Invalid file. Please use a previously exported customer JSON.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function refreshCustomerDropdown() {
+  var sel = document.getElementById('cust-select');
+  var custs = loadCustomers();
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— Select saved customer —</option>'
+    + custs.map(function(c, i) {
+        return '<option value="' + i + '">' + esc(c.name) + (c.phone ? ' · ' + c.phone : '') + '</option>';
+      }).join('');
+  if (cur !== '') sel.value = cur;
+}
+
+function selectCustomer(idx) {
+  if (idx === '') return;
+  var custs = loadCustomers();
+  var c = custs[parseInt(idx)];
+  if (!c) return;
+  document.getElementById('cust-name').value  = c.name  || '';
+  document.getElementById('cust-addr').value  = c.addr  || '';
+  document.getElementById('cust-pan').value   = c.pan   || '';
+  document.getElementById('cust-gstin').value = c.gstin || '';
+  document.getElementById('cust-phone').value = c.phone || '';
+  render();
+}
+
+function openCustomerManager() {
+  document.getElementById('cust-modal-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  ghFetchCustomers().then(function() {
+    renderCustomerList();
+    refreshCustomerDropdown();
+  });
+}
+function closeCustomerManager() {
+  document.getElementById('cust-modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+  refreshCustomerDropdown();
+}
+function closeCustModal(e) {
+  if (e.target === document.getElementById('cust-modal-overlay')) closeCustomerManager();
+}
+
+function renderCustomerList() {
+  var custs = loadCustomers();
+  document.getElementById('cust-count').textContent = custs.length;
+  var el = document.getElementById('cust-list');
+  if (custs.length === 0) {
+    el.innerHTML = '<div class="no-customers">No customers saved yet. Add one above ☝</div>';
+    return;
+  }
+  el.innerHTML = custs.map(function(c, i) {
+    var editId = 'cust-edit-' + i;
+    return '<div class="cust-card" id="cust-card-' + i + '">'
+      + '<div class="cust-card-info">'
+        + '<div class="cust-card-name">' + esc(c.name) + '</div>'
+        + '<div class="cust-card-detail">'
+          + (c.addr  ? '📍 ' + esc(c.addr)  + '<br>' : '')
+          + (c.phone ? '📞 ' + esc(c.phone) + '&nbsp;&nbsp;' : '')
+          + (c.pan   ? 'PAN: ' + esc(c.pan)   + '&nbsp;&nbsp;' : '')
+          + (c.gstin ? 'GSTIN: ' + esc(c.gstin) : '')
+        + '</div>'
+        // Inline edit form (hidden by default)
+        + '<div id="' + editId + '" style="display:none;margin-top:12px;display:none">'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:10px">'
+            + '<div class="field-group" style="grid-column:span 2"><label>Name</label><input id="ce-name-' + i + '" value="' + esc(c.name) + '"></div>'
+            + '<div class="field-group" style="grid-column:span 2"><label>Address</label><input id="ce-addr-' + i + '" value="' + esc(c.addr||'') + '"></div>'
+            + '<div class="field-group"><label>PAN</label><input id="ce-pan-' + i + '" value="' + esc(c.pan||'') + '"></div>'
+            + '<div class="field-group"><label>GSTIN</label><input id="ce-gstin-' + i + '" value="' + esc(c.gstin||'') + '"></div>'
+            + '<div class="field-group"><label>Phone</label><input id="ce-phone-' + i + '" value="' + esc(c.phone||'') + '"></div>'
+            + '<div class="field-group" style="justify-content:flex-end;padding-top:18px">'
+              + '<button class="btn-use-cust" onclick="saveEditCustomer(' + i + ')" style="width:100%">💾 Save</button>'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="cust-card-actions">'
+        + '<button class="btn-use-cust" onclick="useCustFromModal(' + i + ')">✔ Use</button>'
+        + '<button class="btn-use-cust" onclick="toggleCustEdit(' + i + ')" style="background:rgba(218,165,32,0.2);border:1px solid var(--g2);color:var(--g3)">✏ Edit</button>'
+        + '<button class="btn-del-cust" onclick="deleteCustomer(' + i + ')">🗑 Delete</button>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function toggleCustEdit(i) {
+  var el = document.getElementById('cust-edit-' + i);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveEditCustomer(i) {
+  var custs = loadCustomers();
+  custs[i] = {
+    name:  document.getElementById('ce-name-'  + i).value.trim(),
+    addr:  document.getElementById('ce-addr-'  + i).value.trim(),
+    pan:   document.getElementById('ce-pan-'   + i).value.trim(),
+    gstin: document.getElementById('ce-gstin-' + i).value.trim(),
+    phone: document.getElementById('ce-phone-' + i).value.trim()
+  };
+  if (!custs[i].name) { alert('Name is required.'); return; }
+  saveCustomers(custs);
+  renderCustomerList();
+  refreshCustomerDropdown();
+}
+
+function saveNewCustomer() {
+  var name = document.getElementById('nc-name').value.trim();
+  if (!name) { alert('Customer name is required.'); return; }
+  var custs = loadCustomers();
+  custs.push({
+    name:  name,
+    addr:  document.getElementById('nc-addr').value.trim(),
+    pan:   document.getElementById('nc-pan').value.trim(),
+    gstin: document.getElementById('nc-gstin').value.trim(),
+    phone: document.getElementById('nc-phone').value.trim()
+  });
+  saveCustomers(custs);
+  // Clear form
+  ['nc-name','nc-addr','nc-pan','nc-gstin','nc-phone'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  renderCustomerList();
+}
+
+function deleteCustomer(i) {
+  if (!confirm('Delete this customer?')) return;
+  var custs = loadCustomers();
+  custs.splice(i, 1);
+  saveCustomers(custs);
+  renderCustomerList();
+}
+
+function useCustFromModal(i) {
+  var custs = loadCustomers();
+  var c = custs[i];
+  if (!c) return;
+  document.getElementById('cust-name').value  = c.name  || '';
+  document.getElementById('cust-addr').value  = c.addr  || '';
+  document.getElementById('cust-pan').value   = c.pan   || '';
+  document.getElementById('cust-gstin').value = c.gstin || '';
+  document.getElementById('cust-phone').value = c.phone || '';
+  render();
+  closeCustomerManager();
+}
+
+function toggleShopSection() {
+  var sec = document.getElementById('shop-section');
+  var icon = document.getElementById('shop-toggle-icon');
+  if (sec.style.display === 'none') {
+    sec.style.display = 'grid';
+    icon.textContent = '▲';
+  } else {
+    sec.style.display = 'none';
+    icon.textContent = '▼';
+  }
+}
+
+// ===== SHOP DIRECTORY =====
+var SG_ANTIQUES_SHOP = {
+  name: 'SG Antiques Jewellery',
+  logo: 'SG',
+  tagline: 'Jewellery Manufacturers',
+  phone: '9865031824, 0422-2341991',
+  email: 'anticjewels.cbe@gmail.com',
+  addr: '22B, Raj Nagar, Selvapuram, Coimbatore - 641026',
+  gstin: '33DUSPS7454F1Z0',
+  bank: 'Axis Bank, Town Hall',
+  acc: '918020021078772',
+  ifsc: 'UTIB0001919'
+};
+var shopsList = [];
+
+function loadShops() { return shopsList; }
+function saveShopsLocal() { localStorage.setItem('sg_shops', JSON.stringify(shopsList)); }
+
+async function ghFetchShops() {
+  try {
+    var resp = await fetch('https://api.github.com/repos/' + GH.repo + '/contents/shops.json', {
+      headers: { 'Authorization': 'token ' + GH.token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (resp.status === 404) { shopsList = []; GH.shopSha = null; }
+    else if (!resp.ok) throw new Error('GitHub error: ' + resp.status);
+    else {
+      var data = await resp.json();
+      GH.shopSha = data.sha;
+      shopsList = JSON.parse(atob(data.content.replace(/\n/g,''))) || [];
+    }
+  } catch(e) {
+    try { shopsList = JSON.parse(localStorage.getItem('sg_shops') || '[]'); } catch(ex) { shopsList = []; }
+  }
+  // Always ensure SG Antiques is in the list
+  var hasSG = shopsList.some(function(s){ return s.name === SG_ANTIQUES_SHOP.name; });
+  if (!hasSG) shopsList.unshift(SG_ANTIQUES_SHOP);
+}
+
+async function ghSaveShops() {
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify(shopsList, null, 2))));
+  var body = { message: 'Update shops.json — ' + new Date().toLocaleString('en-IN'), content: content };
+  if (GH.shopSha) body.sha = GH.shopSha;
+  try {
+    var resp = await fetch('https://api.github.com/repos/' + GH.repo + '/contents/shops.json', {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + GH.token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) throw new Error('Save failed: ' + resp.status);
+    var result = await resp.json();
+    GH.shopSha = result.content.sha;
+    saveShopsLocal();
+  } catch(e) { saveShopsLocal(); console.warn('Shop GitHub save failed:', e.message); }
+}
+
+function refreshShopDropdown() {
+  var sel = document.getElementById('shop-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Select saved shop —</option>'
+    + shopsList.map(function(s, i) {
+        return '<option value="' + i + '">' + esc(s.name) + '</option>';
+      }).join('');
+}
+
+function selectShop(idx) {
+  if (idx === '') return;
+  var s = shopsList[parseInt(idx)];
+  if (!s) return;
+  document.getElementById('shop-name').value    = s.name    || '';
+  document.getElementById('shop-logo').value    = s.logo    || '';
+  document.getElementById('shop-tagline').value = s.tagline || '';
+  document.getElementById('shop-phone').value   = s.phone   || '';
+  document.getElementById('shop-email').value   = s.email   || '';
+  document.getElementById('shop-addr').value    = s.addr    || '';
+  document.getElementById('gstin').value        = s.gstin   || '';
+  document.getElementById('bank-name').value    = s.bank    || '';
+  document.getElementById('bank-acc').value     = s.acc     || '';
+  document.getElementById('bank-ifsc').value    = s.ifsc    || '';
+  render();
+}
+
+function openShopManager() {
+  document.getElementById('shop-modal-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  renderShopList();
+}
+function closeShopManager() {
+  document.getElementById('shop-modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+  refreshShopDropdown();
+}
+function closeShopModal(e) {
+  if (e.target === document.getElementById('shop-modal-overlay')) closeShopManager();
+}
+
+function renderShopList() {
+  document.getElementById('shop-count').textContent = shopsList.length;
+  var el = document.getElementById('shop-list');
+  if (shopsList.length === 0) {
+    el.innerHTML = '<div class="no-customers">No shops saved yet. Add one above ☝</div>';
+    return;
+  }
+  el.innerHTML = shopsList.map(function(s, i) {
+    return '<div class="cust-card" id="shop-card-' + i + '">'
+      + '<div class="cust-card-info">'
+        + '<div class="cust-card-name">'
+          + '<span style="background:linear-gradient(135deg,var(--g2),var(--g1));color:#0d0800;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;margin-right:8px">' + esc(s.logo||'?') + '</span>'
+          + esc(s.name)
+        + '</div>'
+        + '<div class="cust-card-detail">'
+          + (s.addr  ? '📍 ' + esc(s.addr) + '<br>' : '')
+          + (s.phone ? '📞 ' + esc(s.phone) + '&nbsp;&nbsp;' : '')
+          + (s.gstin ? 'GSTIN: ' + esc(s.gstin) + '&nbsp;&nbsp;' : '')
+          + (s.bank  ? '🏦 ' + esc(s.bank) : '')
+        + '</div>'
+        // Inline edit form
+        + '<div id="shop-edit-' + i + '" style="display:none;margin-top:12px">'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:10px">'
+            + '<div class="field-group" style="grid-column:span 2"><label>Shop Name</label><input id="se-name-' + i + '" value="' + esc(s.name||'') + '"></div>'
+            + '<div class="field-group"><label>Logo Initials</label><input id="se-logo-' + i + '" value="' + esc(s.logo||'') + '" maxlength="3"></div>'
+            + '<div class="field-group"><label>Tagline</label><input id="se-tagline-' + i + '" value="' + esc(s.tagline||'') + '"></div>'
+            + '<div class="field-group"><label>Phone</label><input id="se-phone-' + i + '" value="' + esc(s.phone||'') + '"></div>'
+            + '<div class="field-group"><label>Email</label><input id="se-email-' + i + '" value="' + esc(s.email||'') + '"></div>'
+            + '<div class="field-group" style="grid-column:span 2"><label>Address</label><input id="se-addr-' + i + '" value="' + esc(s.addr||'') + '"></div>'
+            + '<div class="field-group"><label>GSTIN</label><input id="se-gstin-' + i + '" value="' + esc(s.gstin||'') + '"></div>'
+            + '<div class="field-group"><label>Bank &amp; Branch</label><input id="se-bank-' + i + '" value="' + esc(s.bank||'') + '"></div>'
+            + '<div class="field-group"><label>Account No</label><input id="se-acc-' + i + '" value="' + esc(s.acc||'') + '"></div>'
+            + '<div class="field-group"><label>IFSC</label><input id="se-ifsc-' + i + '" value="' + esc(s.ifsc||'') + '"></div>'
+            + '<div class="field-group" style="grid-column:span 2">'
+              + '<button class="btn-use-cust" onclick="saveEditShop(' + i + ')" style="width:100%">💾 Save Changes</button>'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="cust-card-actions">'
+        + '<button class="btn-use-cust" onclick="useShopFromModal(' + i + ')">✔ Use</button>'
+        + '<button class="btn-use-cust" onclick="toggleShopEdit(' + i + ')" style="background:rgba(218,165,32,0.2);border:1px solid var(--g2);color:var(--g3)">✏ Edit</button>'
+        + '<button class="btn-del-cust" onclick="deleteShop(' + i + ')">🗑 Delete</button>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function toggleShopEdit(i) {
+  var el = document.getElementById('shop-edit-' + i);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveEditShop(i) {
+  if (!document.getElementById('se-name-' + i).value.trim()) { alert('Shop name is required.'); return; }
+  shopsList[i] = {
+    name:    document.getElementById('se-name-'    + i).value.trim(),
+    logo:    document.getElementById('se-logo-'    + i).value.trim(),
+    tagline: document.getElementById('se-tagline-' + i).value.trim(),
+    phone:   document.getElementById('se-phone-'   + i).value.trim(),
+    email:   document.getElementById('se-email-'   + i).value.trim(),
+    addr:    document.getElementById('se-addr-'    + i).value.trim(),
+    gstin:   document.getElementById('se-gstin-'   + i).value.trim(),
+    bank:    document.getElementById('se-bank-'    + i).value.trim(),
+    acc:     document.getElementById('se-acc-'     + i).value.trim(),
+    ifsc:    document.getElementById('se-ifsc-'    + i).value.trim()
+  };
+  ghSaveShops();
+  renderShopList();
+  refreshShopDropdown();
+}
+
+function saveNewShop() {
+  var name = document.getElementById('ns-name').value.trim();
+  if (!name) { alert('Shop name is required.'); return; }
+  shopsList.push({
+    name:    name,
+    logo:    document.getElementById('ns-logo').value.trim(),
+    tagline: document.getElementById('ns-tagline').value.trim(),
+    phone:   document.getElementById('ns-phone').value.trim(),
+    email:   document.getElementById('ns-email').value.trim(),
+    addr:    document.getElementById('ns-addr').value.trim(),
+    gstin:   document.getElementById('ns-gstin').value.trim(),
+    bank:    document.getElementById('ns-bank').value.trim(),
+    acc:     document.getElementById('ns-acc').value.trim(),
+    ifsc:    document.getElementById('ns-ifsc').value.trim()
+  });
+  ghSaveShops();
+  ['ns-name','ns-logo','ns-tagline','ns-phone','ns-email','ns-addr','ns-gstin','ns-bank','ns-acc','ns-ifsc'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  renderShopList();
+}
+
+function deleteShop(i) {
+  if (!confirm('Delete this shop?')) return;
+  shopsList.splice(i, 1);
+  ghSaveShops();
+  renderShopList();
+}
+
+function useShopFromModal(i) {
+  selectShop(i);
+  closeShopManager();
+}
+
+// ===== PRESET ITEMS REGISTRY =====
+// These are ready-made item templates — add more here as needed
+var PRESET_ITEMS = {
+  'Gold Coin':     { desc: 'Gold Coin',     type: 'add', rateOverride: null },
+  'Silver Coin':   { desc: 'Silver Coin',   type: 'add', rateOverride: null },
+  'Gold Jewels':   { desc: 'Gold Jewels',   type: 'add', rateOverride: null },
+  'Silver Jewels': { desc: 'Silver Jewels', type: 'add', rateOverride: null },
+  'Necklace':      { desc: 'Necklace',      type: 'add', rateOverride: null },
+  'Jimikki':       { desc: 'Jimikki',       type: 'add', rateOverride: null },
+  'Old Jewels':    { desc: 'Old Jewels',    type: 'sub', rateOverride: null },
+  'Stone Weight':  { desc: 'Stone Weight',  type: 'sub', rateOverride: null }
+};
+
+function addPreset(name) {
+  var preset = PRESET_ITEMS[name];
+  if (!preset) return;
+  items.push({
+    desc: preset.desc,
+    gross: '',
+    type: preset.type,
+    rateOverride: preset.rateOverride,
+    amtOverride: null
+  });
+  renderItemsEditor();
+  render();
+  // Scroll to & focus the gross weight input of the new row
+  setTimeout(function() {
+    var rows = document.querySelectorAll('#items-tbody tr');
+    var lastRow = rows[rows.length - 1];
+    if (lastRow) {
+      var inp = lastRow.querySelectorAll('input')[1]; // gross wt is 2nd input
+      if (inp) { inp.focus(); inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    }
+  }, 50);
+}
+
+function renderItemsEditor() {
+  var rate = getGoldRate();
+  document.getElementById('rate-badge').textContent = 'Gold Rate: Rs.' + fmtMoney(rate) + ' / gram';
+  var tbody = document.getElementById('items-tbody');
+  tbody.innerHTML = items.map(function(it, i) {
+    var isAdd = it.type !== 'sub';
+    var eRate = effectiveRate(it);
+    var isRateCustom = it.rateOverride !== null && it.rateOverride !== '';
+    var computed = autoAmt(it);
+    var isAmtOverride = it.amtOverride !== null && it.amtOverride !== '';
+    var dispAmt = isAmtOverride ? fmtMoney(parseFloat(it.amtOverride)) : (computed > 0 ? fmtMoney(computed) : '');
+    return '<tr>'
+      + '<td style="color:var(--g3);font-size:0.8rem;padding:4px 8px;text-align:center">' + (i+1) + '</td>'
+      // +/- toggle
+      + '<td style="padding:4px 4px">'
+        + '<div class="type-toggle">'
+          + '<button class="' + (isAdd ? 'active-add' : '') + '" onclick="setType(' + i + ',\'add\')" title="Add to total">+</button>'
+          + '<button class="' + (!isAdd ? 'active-sub' : '') + '" onclick="setType(' + i + ',\'sub\')" title="Subtract from total">−</button>'
+        + '</div>'
+      + '</td>'
+      + '<td><input value="' + esc(it.desc) + '" oninput="updateItem(' + i + ',\'desc\',this.value)" placeholder="Description"></td>'
+      + '<td><input type="number" step="0.001" value="' + (it.gross || '') + '" oninput="updateItem(' + i + ',\'gross\',this.value)" style="text-align:left" placeholder="0.000"></td>'
+      // Per-row rate — editable, defaults to global rate
+      + '<td><input class="rate-input' + (isRateCustom ? ' rate-custom' : '') + '" type="text" inputmode="decimal" '
+        + 'value="' + (isRateCustom ? fmtMoney(it.rateOverride) : '') + '" '
+        + 'placeholder="' + fmtMoney(rate) + '" '
+        + 'onfocus="rateFocus(' + i + ')" '
+        + 'oninput="rateInput(' + i + ',this.value)" '
+        + 'onblur="rateBlur(' + i + ',this.value)" '
+        + 'title="' + (isRateCustom ? 'Custom rate — clear to use global gold rate' : 'Using global gold rate') + '">'
+      + '</td>'
+      // Amount
+      + '<td><input class="amt-input' + (isAmtOverride ? ' amt-overridden' : '') + '" type="text" inputmode="decimal" value="' + dispAmt + '" '
+        + 'onfocus="amtFocus(' + i + ')" '
+        + 'oninput="amtInput(' + i + ',this.value)" '
+        + 'onblur="amtBlur(' + i + ',this.value)" '
+        + 'style="' + (!isAdd ? 'color:#ff9090' : '') + '" '
+        + 'title="' + (isAmtOverride ? 'Manual override — clear to revert to auto' : 'Auto: ' + (parseFloat(it.gross)||0).toFixed(3) + 'g × Rs.' + fmtMoney(eRate)) + '" '
+        + 'placeholder="auto"></td>'
+      + '<td style="text-align:center"><button class="btn btn-danger" onclick="removeItem(' + i + ')">X</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function addItem() {
+  items.push({ desc: '', gross: '', type: 'add', rateOverride: null, amtOverride: null });
+  renderItemsEditor(); render();
+}
+function removeItem(i) {
+  items.splice(i, 1);
+  renderItemsEditor(); render();
+}
+
+function g(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+function fmtDate(d) {
+  if (!d) return '';
+  var p = d.split('-');
+  return p[2] + '.' + p[1] + '.' + p[0];
+}
+
+function numToWords(n) {
+  var ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten',
+    'Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  var tensW=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function h(num) {
+    if(num===0) return '';
+    if(num<20) return ones[num]+' ';
+    if(num<100) return tensW[Math.floor(num/10)]+(num%10?' '+ones[num%10]:'')+' ';
+    return ones[Math.floor(num/100)]+' Hundred '+h(num%100);
+  }
+  var paisa = Math.round((n % 1) * 100);
+  n = Math.floor(n);
+  if(n===0 && paisa===0) return 'Zero';
+  var result='';
+  if(n>=10000000){result+=h(Math.floor(n/10000000))+'Crore ';n%=10000000;}
+  if(n>=100000){result+=h(Math.floor(n/100000))+'Lakh ';n%=100000;}
+  if(n>=1000){result+=h(Math.floor(n/1000))+'Thousand ';n%=1000;}
+  result+=h(n);
+  if(paisa>0) result+=' and '+paisa+' Paise';
+  return result.trim()+' Only';
+}
+
+function render() {
+  // Update watermark
+  var billEl = document.getElementById('bill');
+  if (billEl) billEl.setAttribute('data-watermark', window.currentBillType === 'original' ? 'ORIGINAL' : window.currentBillType === 'estimation' ? 'ESTIMATION' : 'BILL COPY');
+
+  var invNo=g('inv-no'), invDate=fmtDate(g('inv-date')), goldRate=getGoldRate();
+  var carat=g('carat'), custName=g('cust-name'), custAddr=g('cust-addr');
+  var custPan=g('cust-pan'), custGstin=g('cust-gstin'), custPhone=g('cust-phone');
+  var gstin=g('gstin'), hsn=g('hsn');
+  var gstOn = document.getElementById('gst-toggle') ? document.getElementById('gst-toggle').checked : true;
+  var cgstPct = gstOn ? (parseFloat(g('cgst'))||0) : 0;
+  var sgstPct = gstOn ? (parseFloat(g('sgst'))||0) : 0;
+  var hallmarkOn = document.getElementById('hallmark-toggle') ? document.getElementById('hallmark-toggle').checked : false;
+  var hallmarkAmt = hallmarkOn ? (parseFloat(g('hallmark-amt'))||0) : 0;
+  var shopName=g('shop-name'), shopPhone=g('shop-phone'), shopAddr=g('shop-addr');
+  var shopLogo=g('shop-logo')||'SG', shopTagline=g('shop-tagline')||'Jewellery Manufacturers';
+  var shopEmail=g('shop-email');
+  var bankOn = document.getElementById('bank-toggle') ? document.getElementById('bank-toggle').checked : true;
+  var bankName=g('bank-name'), bankAcc=g('bank-acc'), bankIfsc=g('bank-ifsc');
+
+  // Net total = sum of signed amounts
+  var subtotal = items.reduce(function(s, it) { return s + signedAmt(it); }, 0);
+  var totalAddWt = items.filter(function(it){ return it.type !== 'sub'; }).reduce(function(s,it){ return s+(parseFloat(it.gross)||0); }, 0);
+  var totalSubWt = items.filter(function(it){ return it.type === 'sub'; }).reduce(function(s,it){ return s+(parseFloat(it.gross)||0); }, 0);
+  var netGoldWt = totalAddWt - totalSubWt;
+
+  var cgstAmt = gstOn ? subtotal * cgstPct / 100 : 0;
+  var sgstAmt = gstOn ? subtotal * sgstPct / 100 : 0;
+  // Hallmark attracts 9% GST (CGST 4.5% + SGST 4.5%) separately
+  var hallmarkCgst = hallmarkOn ? hallmarkAmt * 4.5 / 100 : 0;
+  var hallmarkSgst = hallmarkOn ? hallmarkAmt * 4.5 / 100 : 0;
+  var netTotal = subtotal + cgstAmt + sgstAmt + hallmarkAmt + hallmarkCgst + hallmarkSgst;
+
+  var itemRows = items.map(function(it, i) {
+    var amt = calcAmt(it);
+    var isSub = it.type === 'sub';
+    var eRate = effectiveRate(it);
+    var isCustomRate = it.rateOverride !== null && it.rateOverride !== '';
+    return '<tr' + (isSub ? ' style="background:rgba(220,60,60,0.04)"' : '') + '>'
+      + '<td>' + (i+1) + '</td>'
+      + '<td style="text-align:center">'
+        + '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:0.72rem;font-weight:700;'
+          + (isSub ? 'background:rgba(220,60,60,0.15);color:#c0392b' : 'background:rgba(50,160,70,0.12);color:#27ae60') + '">'
+          + (isSub ? '−' : '+') + '</span>'
+      + '</td>'
+      + '<td>' + (it.desc||'') + '</td>'
+      + '<td style="text-align:left">' + (it.gross ? parseFloat(it.gross).toFixed(3) : '') + '</td>'
+      + '<td style="text-align:center;font-size:0.78rem">'
+        + (isCustomRate
+          ? '<span style="color:#e67e22;font-weight:700">Rs.' + fmtMoney(eRate) + '</span>'
+          : 'Rs.' + fmtMoney(eRate))
+      + '</td>'
+      + '<td style="text-align:right;' + (isSub ? 'color:#c0392b' : '') + '">'
+        + (amt > 0 ? (isSub ? '(−) ' : '') + 'Rs.' + fmtINR(amt) : '')
+      + '</td>'
+      + '</tr>';
+  }).join('');
+
+  var empties = '';
+
+  var gstRows = gstOn
+    ? '<tr class="gst-row"><td colspan="4"></td><td style="text-align:right">CGST ' + cgstPct + '%</td><td style="text-align:right">Rs.' + fmtINR(cgstAmt) + '</td></tr>'
+      + '<tr class="gst-row"><td colspan="4"></td><td style="text-align:right">SGST ' + sgstPct + '%</td><td style="text-align:right">Rs.' + fmtINR(sgstAmt) + '</td></tr>'
+    : '';
+
+  var hallmarkRow = hallmarkOn
+    ? '<tr class="hallmark-charge-row"><td colspan="4"></td>'
+        + '<td style="text-align:right">'
+          + '<span class="hallmark-label">✦ Hallmark Charge</span>'
+        + '</td>'
+        + '<td style="text-align:right"><span class="hallmark-amt-val">Rs.' + fmtINR(hallmarkAmt) + '</span></td>'
+      + '</tr>'
+      + '<tr class="hallmark-gst-row"><td colspan="4"></td>'
+        + '<td style="text-align:right">'
+          + '<span class="hallmark-gst-label">GST @ 9% <em>(on Hallmark)</em></span>'
+        + '</td>'
+        + '<td style="text-align:right"><span class="hallmark-gst-val">Rs.' + fmtINR(hallmarkCgst + hallmarkSgst) + '</span></td>'
+      + '</tr>'
+    : '';
+
+  // Weight summary — only shown if there are subtracted rows
+  var hasSub = items.some(function(it){ return it.type === 'sub'; });
+  var wtSummary = hasSub
+    ? '<tr style="background:rgba(218,165,32,0.05);font-size:0.74rem;">'
+        + '<td colspan="2" style="padding:5px 10px;color:var(--muted);font-style:italic">Weight Summary</td>'
+        + '<td style="text-align:center;color:var(--muted)">Gold: <strong style="color:var(--text)">' + parseFloat(totalAddWt).toFixed(3) + 'g</strong></td>'
+        + '<td style="text-align:center;color:#c0392b">Less: <strong>' + parseFloat(totalSubWt).toFixed(3) + 'g</strong></td>'
+        + '<td style="text-align:center;color:var(--g1)" colspan="2">Net Gold Wt: <strong>' + parseFloat(netGoldWt).toFixed(3) + 'g</strong></td>'
+      + '</tr>'
+    : '';
+
+  document.getElementById('bill').innerHTML =
+    '<div class="bill-header">'
+      + '<div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;line-height:2.2"><em>ANTIQUE &bull; GOLD &bull; SILVER</em><br><span style="font-size:0.6rem;letter-spacing:2px;color:#b8860b">' + (window.currentBillType === 'original' ? 'ORIGINAL BILL' : window.currentBillType === 'estimation' ? 'ESTIMATION BILL' : 'BILL COPY') + '</span></div>'
+      + '<div class="bill-logo"><div class="logo-circle" style="' + (function(t){
+          var l=t.length;
+          if(l<=2) return 'width:76px;height:76px;font-size:1.8rem';
+          if(l<=4) return 'width:86px;height:86px;font-size:1.3rem';
+          if(l<=8) return 'width:100px;height:100px;font-size:0.95rem';
+          return 'width:110px;height:110px;font-size:0.75rem;border-radius:12px';
+        })(shopLogo) + '">' + shopLogo + '</div><div class="brand-name" style="text-align:center">' + shopName + '</div><div class="brand-subtitle" style="text-align:center">' + shopTagline + '</div></div>'
+      + '<div class="bis-badge">BIS<br>100% Hall Marked<br>Jewellery</div>'
+    + '</div>'
+    + '<div class="bill-top-meta"><span>GSTIN: ' + gstin + '</span><span>State Code: 33</span><span>HSN Code: ' + hsn + '</span></div>'
+    + '<div class="bill-type-tag">' + (window.currentBillType === 'original' ? 'Original Bill' : window.currentBillType === 'estimation' ? 'Estimation Bill' : 'Bill Copy') + '</div>'
+    + '<div class="bill-meta">'
+      + '<div class="meta-row"><span class="meta-label">Inv. No</span><span class="meta-value">: ' + invNo + '</span></div>'
+      + '<div class="meta-row"><span class="meta-label">Gold Rate (' + carat + ')</span><span class="meta-value">: Rs.' + fmtMoney(goldRate) + ' /gram</span></div>'
+      + '<div class="meta-row"><span class="meta-label">Date</span><span class="meta-value">: ' + invDate + '</span></div>'
+      + '<div></div>'
+      + '<div class="meta-row"><span class="meta-label">Customer Name</span><span class="meta-value">: ' + custName + '</span></div>'
+      + '<div></div>'
+      + '<div class="meta-row" style="grid-column:span 2"><span class="meta-label">Address</span><span class="meta-value">: ' + custAddr + '</span></div>'
+      + '<div class="meta-row"><span class="meta-label">PAN Card</span><span class="meta-value">: ' + (custPan||'') + '</span></div>'
+      + '<div class="meta-row"><span class="meta-label">Customer GSTIN</span><span class="meta-value">: ' + (custGstin||'') + '</span></div>'
+      + (custPhone ? '<div class="meta-row"><span class="meta-label">Phone</span><span class="meta-value">: ' + custPhone + '</span></div><div></div>' : '')
+    + '</div>'
+    + '<table class="bill-table">'
+      + '<thead><tr>'
+        + '<th style="width:36px">S.No</th>'
+        + '<th style="width:36px;text-align:center">+/−</th>'
+        + '<th>Description</th>'
+        + '<th style="text-align:left">Weight (g)</th>'
+        + '<th style="text-align:center">Rate (Rs/g)</th>'
+        + '<th style="text-align:right">Amount</th>'
+      + '</tr>'
+      + '<tr class="section-header"><td colspan="6">NEW JEWELS</td></tr></thead>'
+      + '<tbody>' + itemRows + empties + '</tbody>'
+      + '<tfoot class="totals-section">'
+        + wtSummary
+        + '<tr class="total-row">'
+          + '<td colspan="2"></td>'
+          + '<td><strong>Total</strong></td>'
+          + '<td style="text-align:left"><strong>' + parseFloat(totalAddWt).toFixed(3) + 'g</strong>'
+            + (hasSub ? '<br><span style="font-size:0.72rem;color:#c0392b">Net: ' + parseFloat(netGoldWt).toFixed(3) + 'g</span>' : '')
+          + '</td>'
+          + '<td style="text-align:right"><strong>Subtotal</strong></td>'
+          + '<td style="text-align:right"><strong>Rs.' + fmtINR(subtotal) + '</strong></td>'
+        + '</tr>'
+        + gstRows
+        + hallmarkRow
+        + '<tr class="grand-total-row">'
+          + '<td colspan="5" style="text-align:right"><strong>Net Total Rs.</strong></td>'
+          + '<td><strong>Rs.' + fmtINR(netTotal) + '</strong></td>'
+        + '</tr>'
+      + '</tfoot>'
+    + '</table>'
+    + '<div class="bill-footer">'
+      + '<div>'
+        + '<div style="margin-bottom:12px;font-style:italic;font-size:0.82rem;color:var(--muted)"><strong style="color:var(--text)">Amount in words:</strong> Rupees ' + numToWords(netTotal) + '</div>'
+        + (bankOn ? '<div class="bank-details"><strong>Account Details:</strong><br>Bank &amp; Branch: <strong>' + bankName + '</strong><br>Account No: <strong>' + bankAcc + '</strong><br>IFSC: <strong>' + bankIfsc + '</strong></div>' : '')
+      + '</div>'
+    + '</div>'
+    + '<div class="signature-section">'
+      + '<div class="sig-block">'
+        + '<div class="sig-space"></div>'
+        + '<div class="sig-line">Receiver\'s Signature</div>'
+      + '</div>'
+      + '<div class="sig-block sig-block-right">'
+        + '<div class="for-shop-label">for <em>' + shopName + '</em></div>'
+        + '<div class="sig-space"></div>'
+        + '<div class="sig-line">Authorised Signature</div>'
+      + '</div>'
+    + '</div>'
+    + '<div class="bill-address">'
+      + '<span class="bill-addr-line">' + shopAddr + '</span>'
+      + (shopPhone ? '<span class="bill-addr-sep">&#8226;</span><span class="bill-addr-line">Ph: ' + shopPhone + '</span>' : '')
+      + (shopEmail ? '<span class="bill-addr-sep">&#8226;</span><span class="bill-addr-line">' + shopEmail + '</span>' : '')
+      + '</div>'
+    + '<div class="bill-ornament">'
+      + '<div class="orn-line"></div>'
+      + '<div class="bill-ornament-center">'
+        + '<svg width="220" height="38" viewBox="0 0 220 38" fill="none" xmlns="http://www.w3.org/2000/svg">'
+          /* outer scrolls left */
+          + '<path d="M2 19 Q10 6 22 10 Q30 13 28 19 Q26 25 18 23 Q12 21 14 16 Q16 11 22 13" stroke="#b8860b" stroke-width="1.2" fill="none" stroke-linecap="round"/>'
+          + '<path d="M2 19 Q6 26 12 27 Q18 28 20 24" stroke="#daa520" stroke-width="0.8" fill="none" stroke-linecap="round"/>'
+          /* left vine tendrils */
+          + '<path d="M28 19 Q36 12 44 15 Q50 17 48 22 Q46 26 40 24" stroke="#b8860b" stroke-width="1.1" fill="none" stroke-linecap="round"/>'
+          + '<path d="M36 14 Q38 9 42 10" stroke="#daa520" stroke-width="0.7" fill="none" stroke-linecap="round"/>'
+          + '<path d="M44 22 Q46 28 50 26" stroke="#daa520" stroke-width="0.7" fill="none" stroke-linecap="round"/>'
+          /* left leaf cluster */
+          + '<ellipse cx="52" cy="16" rx="5" ry="3" transform="rotate(-30 52 16)" fill="rgba(184,134,11,0.18)" stroke="#b8860b" stroke-width="0.9"/>'
+          + '<ellipse cx="54" cy="22" rx="4" ry="2.5" transform="rotate(20 54 22)" fill="rgba(218,165,32,0.15)" stroke="#daa520" stroke-width="0.8"/>'
+          /* left connecting stem */
+          + '<path d="M58 19 Q64 14 70 17 Q74 19 72 22 Q70 25 66 23" stroke="#b8860b" stroke-width="1" fill="none" stroke-linecap="round"/>'
+          + '<circle cx="66" cy="13" r="2" fill="rgba(218,165,32,0.3)" stroke="#daa520" stroke-width="0.8"/>'
+          /* center diamond motif */
+          + '<path d="M84 19 L90 12 L96 19 L90 26 Z" fill="rgba(218,165,32,0.18)" stroke="#b8860b" stroke-width="1.2"/>'
+          + '<path d="M87 19 L90 15 L93 19 L90 23 Z" fill="rgba(218,165,32,0.35)" stroke="#daa520" stroke-width="0.8"/>'
+          + '<circle cx="90" cy="19" r="1.8" fill="#daa520" opacity="0.7"/>'
+          /* center large floral */
+          + '<circle cx="110" cy="19" r="7" fill="rgba(218,165,32,0.12)" stroke="#b8860b" stroke-width="1.2"/>'
+          + '<circle cx="110" cy="19" r="4" fill="rgba(218,165,32,0.22)" stroke="#daa520" stroke-width="0.9"/>'
+          + '<circle cx="110" cy="19" r="2" fill="#daa520" opacity="0.65"/>'
+          + '<line x1="110" y1="10" x2="110" y2="28" stroke="#b8860b" stroke-width="0.7" opacity="0.5"/>'
+          + '<line x1="101" y1="19" x2="119" y2="19" stroke="#b8860b" stroke-width="0.7" opacity="0.5"/>'
+          + '<line x1="104" y1="13" x2="116" y2="25" stroke="#b8860b" stroke-width="0.6" opacity="0.35"/>'
+          + '<line x1="116" y1="13" x2="104" y2="25" stroke="#b8860b" stroke-width="0.6" opacity="0.35"/>'
+          /* petal dots around center */
+          + '<circle cx="110" cy="11" r="1.4" fill="#daa520" opacity="0.5"/>'
+          + '<circle cx="110" cy="27" r="1.4" fill="#daa520" opacity="0.5"/>'
+          + '<circle cx="102" cy="19" r="1.4" fill="#daa520" opacity="0.5"/>'
+          + '<circle cx="118" cy="19" r="1.4" fill="#daa520" opacity="0.5"/>'
+          /* right diamond motif (mirror) */
+          + '<path d="M124 19 L130 12 L136 19 L130 26 Z" fill="rgba(218,165,32,0.18)" stroke="#b8860b" stroke-width="1.2"/>'
+          + '<path d="M127 19 L130 15 L133 19 L130 23 Z" fill="rgba(218,165,32,0.35)" stroke="#daa520" stroke-width="0.8"/>'
+          + '<circle cx="130" cy="19" r="1.8" fill="#daa520" opacity="0.7"/>'
+          /* right connecting stem */
+          + '<path d="M142 19 Q148 14 154 17 Q158 22 154 24 Q150 26 148 22" stroke="#b8860b" stroke-width="1" fill="none" stroke-linecap="round"/>'
+          + '<circle cx="154" cy="13" r="2" fill="rgba(218,165,32,0.3)" stroke="#daa520" stroke-width="0.8"/>'
+          /* right leaf cluster */
+          + '<ellipse cx="163" cy="16" rx="5" ry="3" transform="rotate(30 163 16)" fill="rgba(184,134,11,0.18)" stroke="#b8860b" stroke-width="0.9"/>'
+          + '<ellipse cx="165" cy="22" rx="4" ry="2.5" transform="rotate(-20 165 22)" fill="rgba(218,165,32,0.15)" stroke="#daa520" stroke-width="0.8"/>'
+          /* right vine tendrils */
+          + '<path d="M168 19 Q174 12 180 15 Q186 18 184 23 Q182 27 176 25" stroke="#b8860b" stroke-width="1.1" fill="none" stroke-linecap="round"/>'
+          + '<path d="M176 13 Q180 8 184 10" stroke="#daa520" stroke-width="0.7" fill="none" stroke-linecap="round"/>'
+          + '<path d="M180 24 Q182 29 186 27" stroke="#daa520" stroke-width="0.7" fill="none" stroke-linecap="round"/>'
+          /* outer scrolls right */
+          + '<path d="M218 19 Q210 6 198 10 Q190 13 192 19 Q194 25 202 23 Q208 21 206 16 Q204 11 198 13" stroke="#b8860b" stroke-width="1.2" fill="none" stroke-linecap="round"/>'
+          + '<path d="M218 19 Q214 26 208 27 Q202 28 200 24" stroke="#daa520" stroke-width="0.8" fill="none" stroke-linecap="round"/>'
+        + '</svg>'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-top:2px">'
+          + '<span style="color:#b8860b;font-size:0.55rem;letter-spacing:0.5px">&#9670;</span>'
+          + '<span style="font-family:\'Cormorant Garamond\',serif;font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:#b8860b;opacity:0.7">Thank You</span>'
+          + '<span style="color:#b8860b;font-size:0.55rem;letter-spacing:0.5px">&#9670;</span>'
+        + '</div>'
+      + '</div>'
+      + '<div class="orn-line-rev"></div>'
+    + '</div>';
+}
+
+async function downloadPDF() {
+  var btn = event.target;
+  var orig = btn.textContent;
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+
+  // A4 at 96 dpi = 794 × 1123 px
+  var A4_W_PX = 794;
+  var A4_H_PX = 1123;
+  var SCALE   = 3; // render at 3× for sharp print quality
+
+  try {
+    var bill  = document.getElementById('bill');
+    var invNo = document.getElementById('inv-no').value || 'bill';
+    var cn    = document.getElementById('cust-name').value.replace(/\s+/g,'_') || 'customer';
+
+    // ── 1. Clone the bill into a hidden off-screen div at exact A4 width ──
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = [
+      'position:fixed', 'left:-9999px', 'top:0',
+      'width:'  + A4_W_PX + 'px',
+      'min-height:' + A4_H_PX + 'px',
+      'background:#fffdf5',
+      'z-index:-1', 'overflow:visible'
+    ].join(';');
+
+    var clone = bill.cloneNode(true);
+    // Apply pdf-mode + reset any inline widths so it fills the A4 container
+    clone.classList.add('pdf-mode');
+    clone.style.cssText = [
+      'width:100%', 'max-width:100%', 'min-width:0',
+      'padding:28px 36px',
+      'box-sizing:border-box',
+      'box-shadow:none',
+      'border:1.5px solid #c8960a',
+      'border-radius:0',
+      'margin:0',
+      'background:#fffdf5',
+      'animation:none',
+      'overflow:visible'
+    ].join(';');
+
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    // Give browser time to paint fonts + layout
+    await new Promise(function(r){ setTimeout(r, 300); });
+
+    // ── 2. Capture the clone at high resolution ──
+    var canvas = await html2canvas(clone, {
+      scale           : SCALE,
+      useCORS         : true,
+      allowTaint      : true,
+      backgroundColor : '#fffdf5',
+      width           : A4_W_PX,
+      height          : clone.scrollHeight,
+      windowWidth     : A4_W_PX,
+      windowHeight    : clone.scrollHeight
+    });
+
+    document.body.removeChild(wrapper);
+
+    // ── 3. Build PDF ──
+    var jsPDF  = window.jspdf.jsPDF;
+    var pdf    = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4', compress:true });
+    var pdfW   = pdf.internal.pageSize.getWidth();   // 210 mm
+    var pdfH   = pdf.internal.pageSize.getHeight();  // 297 mm
+
+    var imgData  = canvas.toDataURL('image/jpeg', 0.93);
+    var imgH_mm  = (canvas.height / canvas.width) * pdfW;
+
+    if (imgH_mm <= pdfH) {
+      // Content fits on one page — fill full width from top
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, imgH_mm);
+    } else {
+      // Scale down proportionally so everything fits on one A4 page
+      var ratio  = pdfH / imgH_mm;
+      var fitW   = pdfW * ratio;
+      pdf.addImage(imgData, 'JPEG', (pdfW - fitW) / 2, 0, fitW, pdfH);
+    }
+
+    // ── 4. Direct download — no popup ──
+    pdf.save('Invoice_' + invNo + '_' + cn + '.pdf');
+
+  } catch(e) {
+    alert('PDF generation failed: ' + e.message);
+  }
+
+  btn.textContent = orig;
+  btn.disabled    = false;
+}
+
+// Bill type: 'original' | 'copy'
+window.currentBillType = 'original';
+
+function setBillType(type) {
+  window.currentBillType = type;
+  var btnOriginal   = document.getElementById('btn-original');
+  var btnCopy       = document.getElementById('btn-copy');
+  var btnEstimation = document.getElementById('btn-estimation');
+  var activeStyle   = { bg: 'linear-gradient(135deg,var(--g2),var(--g1))', color: '#0d0800', border: 'var(--g2)' };
+  var inactiveStyle = { bg: 'transparent', color: 'var(--g2)', border: 'rgba(218,165,32,0.35)' };
+
+  function applyStyle(btn, s) {
+    if (!btn) return;
+    btn.style.background   = s.bg;
+    btn.style.color        = s.color;
+    btn.style.borderColor  = s.border;
+  }
+
+  applyStyle(btnOriginal,   type === 'original'   ? activeStyle : inactiveStyle);
+  applyStyle(btnCopy,       type === 'copy'       ? activeStyle : inactiveStyle);
+  applyStyle(btnEstimation, type === 'estimation' ? activeStyle : inactiveStyle);
+
+  render();
+}
+
+function toggleHallmarkField() {
+  var on = document.getElementById('hallmark-toggle').checked;
+  document.getElementById('hallmark-amt-field').style.display = on ? '' : 'none';
+}
+
+renderItemsEditor();
+render();
+// Load customers and shops from GitHub on startup
+ghFetchCustomers().then(function() { refreshCustomerDropdown(); });
+ghFetchShops().then(function() { refreshShopDropdown(); });
+</script>
+</body>
+</html>
+<script>
+// ===== LOGIN =====
+var LOGIN_USER = 'LogeshApps';
+var LOGIN_PWD  = '12345678';
+
+function doLogin() {
+  var u = document.getElementById('login-user').value.trim();
+  var p = document.getElementById('login-pwd').value;
+  var errEl = document.getElementById('login-error');
+  var box = document.getElementById('login-box');
+  if (u === LOGIN_USER && p === LOGIN_PWD) {
+    errEl.classList.remove('show');
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pwd').value = '';
+  } else {
+    errEl.classList.add('show');
+    box.classList.remove('login-shake');
+    void box.offsetWidth;
+    box.classList.add('login-shake');
+    document.getElementById('login-pwd').value = '';
+    document.getElementById('login-pwd').focus();
+  }
+}
+
+function togglePwd() {
+  var inp = document.getElementById('login-pwd');
+  var eye = document.getElementById('pwd-eye');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    eye.textContent = '\uD83D\uDE48';
+  } else {
+    inp.type = 'password';
+    eye.textContent = '\uD83D\uDC41';
+  }
+}
+
+window.addEventListener('load', function() {
+  document.getElementById('login-user').focus();
+});
+</script>
